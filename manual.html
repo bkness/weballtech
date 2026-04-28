@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>devforge // User Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&family=Exo+2:wght@300;400;600&display=swap');
+
+  :root {
+    --bg: #030a06;
+    --grid: #0d1f12;
+    --green: #00ff41;
+    --green-dim: #00ff4115;
+    --green-mid: #00ff4130;
+    --text: #c8ffd4;
+    --muted: #4a7a55;
+    --border: #1a3a22;
+    --go: #00ADD8;
+    --go-dim: #00add820;
+    --rust: #FF4500;
+    --rust-dim: #ff450020;
+    --py: #FFD43B;
+    --py-dim: #ffd43b20;
+    --warn: #ff9966;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Exo 2', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding: 40px 20px 80px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 500px;
+    background: radial-gradient(ellipse, #00ff4110 0%, transparent 70%);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    text-align: center;
+    margin-bottom: 60px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .header-eyebrow {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 6px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(32px, 6vw, 64px);
+    font-weight: 900;
+    letter-spacing: -1px;
+    line-height: 1;
+    color: var(--green);
+    text-shadow: 0 0 40px #00ff4160, 0 0 80px #00ff4130;
+  }
+
+  h1 em {
+    color: var(--text);
+    font-style: normal;
+    opacity: 0.4;
+  }
+
+  .subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 16px;
+    letter-spacing: 3px;
+  }
+
+  .version-badge {
+    display: inline-block;
+    margin-top: 18px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 4px 14px;
+    border: 1px solid var(--green);
+    border-radius: 2px;
+    color: var(--green);
+    background: var(--green-dim);
+    text-transform: uppercase;
+  }
+
+  /* ─── SECTION HEADERS ─── */
+  .section-header {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin: 50px 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .section-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ─── INSTALL BLOCK ─── */
+  .install-block {
+    border: 1px solid var(--green);
+    border-radius: 4px;
+    overflow: hidden;
+    background: #000d04;
+    animation: fadeUp 0.5s ease both;
+    animation-delay: 0.1s;
+  }
+
+  .install-bar {
+    background: var(--green-mid);
+    border-bottom: 1px solid var(--green);
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot.r { background: var(--rust); }
+  .dot.y { background: var(--py); }
+  .dot.g { background: var(--green); }
+
+  .install-bar span {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-left: 6px;
+  }
+
+  .install-line {
+    padding: 14px 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    color: #a8ffb8;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .install-line:last-child { border-bottom: none; }
+
+  .prompt {
+    color: var(--green);
+    opacity: 0.6;
+    user-select: none;
+  }
+
+  .copy-btn {
+    margin-left: auto;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    padding: 3px 10px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--muted);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .copy-btn:hover {
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  /* ─── TWO COL GRID ─── */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 1100px) {
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 700px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  /* ─── CARD ─── */
+  .card {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease both;
+    background: rgba(0,10,3,0.6);
+  }
+
+  .card.accent-green { --accent: var(--green); --accent-dim: var(--green-dim); }
+  .card.accent-go    { --accent: var(--go);    --accent-dim: var(--go-dim); }
+  .card.accent-rust  { --accent: var(--rust);  --accent-dim: var(--rust-dim); }
+  .card.accent-py    { --accent: var(--py);    --accent-dim: var(--py-dim); }
+
+  .card-header {
+    background: var(--accent-dim, var(--green-dim));
+    border-bottom: 1px solid var(--accent, var(--green));
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-icon { font-size: 20px; line-height: 1; }
+
+  .card-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent, var(--green));
+    text-shadow: 0 0 16px var(--accent, var(--green));
+    letter-spacing: 1px;
+  }
+
+  .card-subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-top: 2px;
+  }
+
+  .card-body {
+    padding: 14px 18px;
+  }
+
+  /* ─── COMMAND TABLE ─── */
+  .cmd-table {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .cmd-row {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 12px;
+    align-items: baseline;
+    padding: 7px 0;
+    border-bottom: 1px solid #0d1f12;
+    font-size: 12px;
+  }
+
+  .cmd-row:last-child { border-bottom: none; }
+
+  .cmd {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--green);
+    white-space: nowrap;
+  }
+
+  .cmd-desc {
+    color: #8ab895;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  /* ─── SHORTCUT TABLE (wider cmd) ─── */
+  .shortcut-row {
+    grid-template-columns: 160px 1fr;
+  }
+
+  /* ─── KBD KEYS ─── */
+  kbd {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 2px 7px;
+    border: 1px solid var(--border);
+    border-bottom: 2px solid var(--border);
+    border-radius: 3px;
+    background: #0d1f12;
+    color: var(--green);
+    white-space: nowrap;
+  }
+
+  /* ─── PILL TAGS ─── */
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .pill {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 3px 10px;
+    border: 1px solid var(--accent, var(--green));
+    border-radius: 2px;
+    color: var(--accent, var(--green));
+    background: var(--accent-dim, var(--green-dim));
+    letter-spacing: 1px;
+  }
+
+  /* ─── NOTE / TIP ─── */
+  .note {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--warn);
+    padding: 8px 12px;
+    border-left: 2px solid var(--warn);
+    background: #1a0a00;
+    border-radius: 0 3px 3px 0;
+    line-height: 1.6;
+  }
+
+  .tip {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--go);
+    padding: 8px 12px;
+    border-left: 2px solid var(--go);
+    background: var(--go-dim);
+    border-radius: 0 3px 3px 0;
+    line-height: 1.6;
+  }
+
+  /* ─── FLOW DIAGRAM ─── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    padding: 4px 0;
+  }
+
+  .flow-step {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--green);
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: var(--green-dim);
+    white-space: nowrap;
+  }
+
+  .flow-arrow {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 0 6px;
+  }
+
+  /* ─── PRE / CODE ─── */
+  pre {
+    background: #000d04;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    border-radius: 3px;
+    padding: 12px 14px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    line-height: 1.8;
+    overflow-x: auto;
+    color: #a8ffb8;
+    white-space: pre;
+  }
+
+  pre .comment { color: var(--muted); }
+  pre .key { color: var(--green); }
+  pre .val { color: var(--py); }
+
+  /* ─── DETECTION TABLE ─── */
+  .detect-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  @media (max-width: 700px) {
+    .detect-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .detect-card {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .detect-card.go    { border-color: var(--go);   background: var(--go-dim); }
+  .detect-card.rust  { border-color: var(--rust);  background: var(--rust-dim); }
+  .detect-card.py    { border-color: var(--py);    background: var(--py-dim); }
+  .detect-card.node  { border-color: var(--green); background: var(--green-dim); }
+
+  .detect-lang {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .detect-card.go   .detect-lang { color: var(--go); }
+  .detect-card.rust .detect-lang { color: var(--rust); }
+  .detect-card.py   .detect-lang { color: var(--py); }
+  .detect-card.node .detect-lang { color: var(--green); }
+
+  .detect-marker {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .detect-icon { font-size: 22px; margin-bottom: 6px; }
+
+  /* ─── PLUGIN FLOW ─── */
+  .plugin-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .plugin-step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .plugin-step:last-child { border-bottom: none; }
+
+  .step-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--green);
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--green);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--green-dim);
+  }
+
+  .step-content {
+    flex: 1;
+  }
+
+  .step-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .step-detail {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    text-align: center;
+    margin-top: 70px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+  }
+
+  footer a {
+    color: var(--green);
+    text-decoration: none;
+    opacity: 0.7;
+  }
+
+  footer a:hover { opacity: 1; }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card:nth-child(1) { animation-delay: 0.05s; }
+  .card:nth-child(2) { animation-delay: 0.10s; }
+  .card:nth-child(3) { animation-delay: 0.15s; }
+  .card:nth-child(4) { animation-delay: 0.20s; }
+  .card:nth-child(5) { animation-delay: 0.25s; }
+  .card:nth-child(6) { animation-delay: 0.30s; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ═══ HEADER ═══ -->
+  <header>
+    <div class="header-eyebrow">// user guide &amp; command reference</div>
+    <h1>⚒ devforge</h1>
+    <div class="subtitle">YOUR DEVELOPER COCKPIT — MODULAR · FAST · EXPRESSIVE</div>
+    <div class="version-badge">v0.3.3 — now on npm</div>
+  </header>
+
+  <!-- ═══ INSTALLATION ═══ -->
+  <div class="section-header">01 // installation</div>
+
+  <div class="install-block">
+    <div class="install-bar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <span>terminal</span>
+    </div>
+    <div class="install-line">
+      <span class="prompt">$</span>
+      <span>npm install -g forged-cli</span>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText('npm install -g forged-cli');this.textContent='✓ copied';setTimeout(()=>this.textContent='copy',1500)">copy</button>
+    </div>
+    <div class="install-line">
+      <span class="prompt">$</span>
+      <span>forged init</span>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText('forged init');this.textContent='✓ copied';setTimeout(()=>this.textContent='copy',1500)">copy</button>
+    </div>
+    <div class="install-line">
+      <span class="prompt">#</span>
+      <span style="color:var(--muted)">then reload your shell — exec zsh</span>
+    </div>
+  </div>
+
+  <div style="margin-top:16px">
+    <div class="tip">💡 devforge writes to ~/dev/dotfiles and adds a source hook to ~/.zshrc automatically. Your existing config is never overwritten.</div>
+  </div>
+
+  <!-- ═══ PROJECT WORKFLOW ═══ -->
+  <div class="section-header">02 // project workflow</div>
+
+  <div class="grid-3">
+
+    <div class="card accent-green">
+      <div class="card-header">
+        <div class="card-icon">⚡</div>
+        <div>
+          <div class="card-title">dev</div>
+          <div class="card-subtitle">OPEN · BOOT · GO</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="cmd-table">
+          <div class="cmd-row">
+            <span class="cmd">dev</span>
+            <span class="cmd-desc">open fuzzy project picker</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">dev myproject</span>
+            <span class="cmd-desc">open directly by name</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">p</span>
+            <span class="cmd-desc">fuzzy pick any project dir</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">pr</span>
+            <span class="cmd-desc">pick project + launch editor</span>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="flow">
+            <span class="flow-step">cd project</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">detect type</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">boot plugin</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card accent-green">
+      <div class="card-header">
+        <div class="card-icon">🆕</div>
+        <div>
+          <div class="card-title">newproj</div>
+          <div class="card-subtitle">SCAFFOLD · INIT · PUSH</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="cmd-table">
+          <div class="cmd-row">
+            <span class="cmd">newproj</span>
+            <span class="cmd-desc">interactive project creator</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">newproj myapp</span>
+            <span class="cmd-desc">create with name pre-filled</span>
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
+          <div class="plugin-step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-title">name + template</div>
+              <div class="step-detail">node / python / rust / none</div>
+            </div>
+          </div>
+          <div class="plugin-step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-title">git init + README</div>
+              <div class="step-detail">.gitignore, .env.example auto-created</div>
+            </div>
+          </div>
+          <div class="plugin-step" style="border-bottom:none">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <div class="step-title">optional: create GitHub repo</div>
+              <div class="step-detail">via gh CLI — private by default</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card accent-green">
+      <div class="card-header">
+        <div class="card-icon">🔭</div>
+        <div>
+          <div class="card-title">navigate</div>
+          <div class="card-subtitle">JUMP · EXPLORE · ARRIVE</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="cmd-table">
+          <div class="cmd-row">
+            <span class="cmd">j</span>
+            <span class="cmd-desc">fuzzy jump (zoxide memory)</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">fcd [dir]</span>
+            <span class="cmd-desc">fuzzy cd from any point</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">..</span>
+            <span class="cmd-desc">cd ..</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">take &lt;dir&gt;</span>
+            <span class="cmd-desc">mkdir + cd in one step</span>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="tip">Use <kbd>Ctrl+E</kbd> to open the file explorer widget from anywhere.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /grid-3 -->
+
+  <!-- ═══ GIT COMMANDS ═══ -->
+  <div class="section-header">03 // git shortcuts</div>
+
+  <div class="grid-2">
+
+    <div class="card accent-green">
+      <div class="card-header">
+        <div class="card-icon">🌿</div>
+        <div>
+          <div class="card-title">branch ops</div>
+          <div class="card-subtitle">CREATE · SWITCH · MERGE</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="cmd-table">
+          <div class="cmd-row">
+            <span class="cmd">chbr</span>
+            <span class="cmd-desc">create + switch to new branch</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">cmst</span>
+            <span class="cmd-desc">switch to main or master</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">gbr</span>
+            <span class="cmd-desc">fuzzy switch any branch</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">gss &lt;branch&gt;</span>
+            <span class="cmd-desc">git switch</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card accent-green">
+      <div class="card-header">
+        <div class="card-icon">📋</div>
+        <div>
+          <div class="card-title">commit + sync</div>
+          <div class="card-subtitle">STAGE · COMMIT · PUSH</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="cmd-table">
+          <div class="cmd-row">
+            <span class="cmd">gs</span>
+            <span class="cmd-desc">git status</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">ga .</span>
+            <span class="cmd-desc">git add all</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">gcm "msg"</span>
+            <span class="cmd-desc">git commit -m</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">gca "msg"</span>
+            <span class="cmd-desc">git commit -a -m (add + commit)</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">gp</span>
+            <span class="cmd-desc">git push</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">gpl</span>
+            <span class="cmd-desc">git pull</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">gl</span>
+            <span class="cmd-desc">git log (graph, oneline)</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">gd / gds</span>
+            <span class="cmd-desc">git diff / diff --staged</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ KEYBOARD SHORTCUTS ═══ -->
+  <div class="section-header">04 // keyboard shortcuts</div>
+
+  <div class="card accent-green">
+    <div class="card-header">
+      <div class="card-icon">⌨️</div>
+      <div>
+        <div class="card-title">keybindings</div>
+        <div class="card-subtitle">WIRED TO ZLE — INSTANT ACCESS</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="cmd-table">
+        <div class="cmd-row shortcut-row">
+          <span class="cmd"><kbd>Ctrl+P</kbd></span>
+          <span class="cmd-desc">command palette — your entire ecosystem at a keystroke. fuzzy search every command, alias, plugin, and hook with live preview.</span>
+        </div>
+        <div class="cmd-row shortcut-row">
+          <span class="cmd"><kbd>Ctrl+R</kbd></span>
+          <span class="cmd-desc">fuzzy history search — enhanced with neon theme, preview pane, and full history navigation.</span>
+        </div>
+        <div class="cmd-row shortcut-row">
+          <span class="cmd"><kbd>Ctrl+E</kbd></span>
+          <span class="cmd-desc">file explorer widget — tab to enter dirs, shift+tab to go up, enter to cd or insert path.</span>
+        </div>
+        <div class="cmd-row shortcut-row">
+          <span class="cmd"><kbd>Ctrl+D</kbd></span>
+          <span class="cmd-desc">project dashboard — full UI with open, create, recent, GitHub, cache ops.</span>
+        </div>
+        <div class="cmd-row shortcut-row">
+          <span class="cmd"><kbd>Tab</kbd></span>
+          <span class="cmd-desc">fzf-powered completion — fuzzy search completions with live preview via fzf-tab.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ AUTO-DETECTION ═══ -->
+  <div class="section-header">05 // project auto-detection</div>
+
+  <div class="card accent-green" style="margin-bottom:16px">
+    <div class="card-header">
+      <div class="card-icon">🔍</div>
+      <div>
+        <div class="card-title">project_detect()</div>
+        <div class="card-subtitle">FIRES ON EVERY cd — BOOTS THE RIGHT PLUGIN</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="detect-grid">
+        <div class="detect-card node">
+          <div class="detect-icon">📦</div>
+          <div class="detect-lang">Node</div>
+          <div class="detect-marker">package.json</div>
+        </div>
+        <div class="detect-card py">
+          <div class="detect-icon">🐍</div>
+          <div class="detect-lang">Python</div>
+          <div class="detect-marker">requirements.txt</div>
+        </div>
+        <div class="detect-card rust">
+          <div class="detect-icon">🦀</div>
+          <div class="detect-lang">Rust</div>
+          <div class="detect-marker">Cargo.toml</div>
+        </div>
+        <div class="detect-card go">
+          <div class="detect-icon">🐹</div>
+          <div class="detect-lang">Go</div>
+          <div class="detect-marker">go.mod</div>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <div class="tip">On cd, devforge fires the on_dir_enter hook → detects type → calls boot_project &lt;type&gt; → runs the registered plugin function.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ WHAT EACH BOOT PLUGIN DOES ═══ -->
+  <div class="grid-2">
+
+    <div class="card accent-go">
+      <div class="card-header">
+        <div class="card-icon">📦</div>
+        <div>
+          <div class="card-title">node boot</div>
+          <div class="card-subtitle">AUTO-INSTALL · DEV SERVER</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="plugin-flow">
+          <div class="plugin-step">
+            <div class="step-num" style="border-color:var(--go);color:var(--go);background:var(--go-dim)">1</div>
+            <div class="step-content">
+              <div class="step-title">check node_modules</div>
+              <div class="step-detail">installs if missing or package.json is newer</div>
+            </div>
+          </div>
+          <div class="plugin-step">
+            <div class="step-num" style="border-color:var(--go);color:var(--go);background:var(--go-dim)">2</div>
+            <div class="step-content">
+              <div class="step-title">open VS Code in background</div>
+              <div class="step-detail">nohup code . — non-blocking</div>
+            </div>
+          </div>
+          <div class="plugin-step" style="border-bottom:none">
+            <div class="step-num" style="border-color:var(--go);color:var(--go);background:var(--go-dim)">3</div>
+            <div class="step-content">
+              <div class="step-title">npm run dev</div>
+              <div class="step-detail">falls back gracefully if no dev script</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card accent-py">
+      <div class="card-header">
+        <div class="card-icon">🐍</div>
+        <div>
+          <div class="card-title">python boot</div>
+          <div class="card-subtitle">VENV · INSTALL · REMEMBER</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="plugin-flow">
+          <div class="plugin-step">
+            <div class="step-num" style="border-color:var(--py);color:var(--py);background:var(--py-dim)">1</div>
+            <div class="step-content">
+              <div class="step-title">first-run preference</div>
+              <div class="step-detail">always auto-boot / always ask / skip — saved to ~/.config/forged/</div>
+            </div>
+          </div>
+          <div class="plugin-step">
+            <div class="step-num" style="border-color:var(--py);color:var(--py);background:var(--py-dim)">2</div>
+            <div class="step-content">
+              <div class="step-title">create .venv if missing</div>
+              <div class="step-detail">python3 -m venv .venv</div>
+            </div>
+          </div>
+          <div class="plugin-step" style="border-bottom:none">
+            <div class="step-num" style="border-color:var(--py);color:var(--py);background:var(--py-dim)">3</div>
+            <div class="step-content">
+              <div class="step-title">activate + install deps</div>
+              <div class="step-detail">source .venv/bin/activate → pip install -r requirements.txt</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ GITHUB DASHBOARD ═══ -->
+  <div class="section-header">06 // github dashboard</div>
+
+  <div class="grid-2">
+
+    <div class="card accent-green">
+      <div class="card-header">
+        <div class="card-icon">🐙</div>
+        <div>
+          <div class="card-title">github_ui / ghui</div>
+          <div class="card-subtitle">FULL TUI — NO BROWSER REQUIRED</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="cmd-table">
+          <div class="cmd-row">
+            <span class="cmd">ghui</span>
+            <span class="cmd-desc">open GitHub dashboard</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">github_ui_prs</span>
+            <span class="cmd-desc">list + act on pull requests</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">github_ui_issues</span>
+            <span class="cmd-desc">list + act on issues</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">github_ui_repos</span>
+            <span class="cmd-desc">browse your repos, clone or view</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">github_ui_clone</span>
+            <span class="cmd-desc">fuzzy-pick a repo to clone</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">github_ui_new</span>
+            <span class="cmd-desc">create a new GitHub repo</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">github_ui_sync_fork</span>
+            <span class="cmd-desc">sync a fork with upstream</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card accent-green">
+      <div class="card-header">
+        <div class="card-icon">🔧</div>
+        <div>
+          <div class="card-title">dev utilities</div>
+          <div class="card-subtitle">SERVER · ENV · PORTS</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="cmd-table">
+          <div class="cmd-row">
+            <span class="cmd">serve [port]</span>
+            <span class="cmd-desc">local HTTP server (default 8080)</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">killport &lt;port&gt;</span>
+            <span class="cmd-desc">kill whatever's running on that port</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">ports</span>
+            <span class="cmd-desc">show all listening TCP ports</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">envload [file]</span>
+            <span class="cmd-desc">load .env into current shell</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">reload</span>
+            <span class="cmd-desc">exec zsh — full shell restart</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">safe</span>
+            <span class="cmd-desc">zsh -f (no config, clean env)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ SHELL ALIASES ═══ -->
+  <div class="section-header">07 // shell aliases</div>
+
+  <div class="card accent-green">
+    <div class="card-header">
+      <div class="card-icon">🔗</div>
+      <div>
+        <div class="card-title">aliases</div>
+        <div class="card-subtitle">MUSCLE MEMORY SHORTCUTS</div>
+      </div>
+    </div>
+    <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0 30px">
+      <div class="cmd-table">
+        <div class="cmd-row">
+          <span class="cmd">ll</span>
+          <span class="cmd-desc">eza -la --icons</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">ls</span>
+          <span class="cmd-desc">eza --icons</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">cat</span>
+          <span class="cmd-desc">bat (syntax-highlighted)</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">c</span>
+          <span class="cmd-desc">clear</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">sz</span>
+          <span class="cmd-desc">source ~/.zshrc</span>
+        </div>
+      </div>
+      <div class="cmd-table">
+        <div class="cmd-row">
+          <span class="cmd">gr</span>
+          <span class="cmd-desc">git restore</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">grs</span>
+          <span class="cmd-desc">git restore --staged</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">ghui</span>
+          <span class="cmd-desc">github_ui dashboard</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">..</span>
+          <span class="cmd-desc">cd ..</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ARCHITECTURE ═══ -->
+  <div class="section-header">08 // architecture</div>
+
+  <div class="grid-2">
+
+    <div class="card accent-green">
+      <div class="card-header">
+        <div class="card-icon">📂</div>
+        <div>
+          <div class="card-title">load order</div>
+          <div class="card-subtitle">.ZSHRC IS A PURE LOADER — NO LOGIC</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <pre><span class="comment"># .zshrc sources in this order:</span>
+<span class="key">plugins.zsh</span>          <span class="comment"># zinit external plugins</span>
+<span class="key">lib/plugin-registry</span> <span class="comment"># PLUGIN_REGISTRY assoc array</span>
+<span class="key">hooks.zsh</span>            <span class="comment"># hook dispatcher</span>
+<span class="key">plugins/project/*.zsh</span> <span class="comment"># lang boot plugins</span>
+<span class="key">lib/*.zsh</span>            <span class="comment"># cache, detect, project</span>
+<span class="key">env → tools → aliases → dev → starship</span></pre>
+      </div>
+    </div>
+
+    <div class="card accent-green">
+      <div class="card-header">
+        <div class="card-icon">🪝</div>
+        <div>
+          <div class="card-title">hook system</div>
+          <div class="card-subtitle">EVENT-DRIVEN SHELL BEHAVIOR</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="cmd-table">
+          <div class="cmd-row">
+            <span class="cmd">register_hook</span>
+            <span class="cmd-desc">bind a function to an event</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">fire_hook</span>
+            <span class="cmd-desc">execute all fns for an event</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">on_dir_enter</span>
+            <span class="cmd-desc">fires on every cd (auto-venv, auto-nvm)</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">on_enter/rust</span>
+            <span class="cmd-desc">fires only in Rust projects</span>
+          </div>
+        </div>
+        <div style="margin-top:10px">
+          <div class="pills">
+            <span class="pill">auto-venv</span>
+            <span class="pill">auto-nvm</span>
+            <span class="pill">rust completions</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ WRITE A PLUGIN ═══ -->
+  <div class="section-header">09 // write a plugin</div>
+
+  <div class="card accent-green">
+    <div class="card-header">
+      <div class="card-icon">🔌</div>
+      <div>
+        <div class="card-title">custom boot plugin</div>
+        <div class="card-subtitle">plugins/project/&lt;lang&gt;.zsh</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <pre><span class="comment"># 1. Define the boot function</span>
+<span class="key">project_boot_mylang</span>() {
+  [[ -f marker.file ]] || return 1
+  echo "🚀 mylang boot"
+  <span class="comment"># your setup logic here</span>
+}
+
+<span class="comment"># 2. Register it — priority 10 = high</span>
+<span class="key">register_plugin</span> mylang project_boot_mylang 10
+
+<span class="comment"># 3. Done. devforge calls it automatically on cd.</span></pre>
+      <div style="margin-top:12px">
+        <div class="note">⚠ Plugin file must be in plugins/project/*.zsh — it's auto-sourced by .zshrc at startup.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CACHE ═══ -->
+  <div class="section-header">10 // cache + debug</div>
+
+  <div class="grid-2">
+
+    <div class="card accent-green">
+      <div class="card-header">
+        <div class="card-icon">💾</div>
+        <div>
+          <div class="card-title">cache system</div>
+          <div class="card-subtitle">FAST DISCOVERY — fd BACKED</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="cmd-table">
+          <div class="cmd-row">
+            <span class="cmd">refresh-dev-cache</span>
+            <span class="cmd-desc">regenerate ~/.dev-projects-cache</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">add-recent</span>
+            <span class="cmd-desc">append PWD to ~/.dev-recent (cap 50)</span>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="pills">
+            <span class="pill">~/.dev-projects-cache</span>
+            <span class="pill">~/.dev-recent</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card accent-green">
+      <div class="card-header">
+        <div class="card-icon">🔬</div>
+        <div>
+          <div class="card-title">debug commands</div>
+          <div class="card-subtitle">INSPECT · PROFILE · VALIDATE</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="cmd-table">
+          <div class="cmd-row">
+            <span class="cmd">zsh -n file.zsh</span>
+            <span class="cmd-desc">syntax check without executing</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">zprof</span>
+            <span class="cmd-desc">profile shell startup time</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">vared PLUGIN_REGISTRY</span>
+            <span class="cmd-desc">inspect registered plugins</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">vared _HOOKS</span>
+            <span class="cmd-desc">inspect registered hooks</span>
+          </div>
+          <div class="cmd-row">
+            <span class="cmd">heredoc_lint file</span>
+            <span class="cmd-desc">detect broken heredocs in any .zsh</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer style="margin-top:70px">
+    // forged by <a href="https://github.com/bkness">bkness</a> &nbsp;·&nbsp;
+    <a href="https://weballtech.com">weballtech.com</a> &nbsp;·&nbsp;
+    <a href="https://github.com/bkness/dotfiles">github</a> &nbsp;·&nbsp;
+    <a href="https://npmjs.com/package/forged-cli">npm</a>
+  </footer>
+
+</div>
+</body>
+</html>
