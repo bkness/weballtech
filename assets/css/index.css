@@ -1,80 +1,54 @@
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
- 
+/* index overrides --green-dim to a solid color for badges/buttons */
 :root {
-      --green: #00ff00;
-      --green-dim: #00cc00;
-      --green-muted: rgba(0,255,0,0.12);
-      --bg: #000;
-      --bg2: #050505;
-      --text: #ccc;
-    }
+  --green-dim: #00cc00;
+}
 
 body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Courier New', Courier, monospace;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1.5rem;
-      overflow-x: hidden;
-    }
+  font-family: 'Courier New', Courier, monospace;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+}
 
-        /* Scanline overlay */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0,255,0,0.015) 2px,
-        rgba(0,255,0,0.015) 4px
-      );
-      pointer-events: none;
-      z-index: 0;
-    }
+main {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 680px;
+  text-align: center;
+}
 
-    main {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 680px;
-      text-align: center;
-    }
-
-    .badge {
-      display: inline-block;
-      border: 1px solid var(--green-dim);
-      color: var(--green-dim);
-      font-size: 0.75rem;
-      letter-spacing: 0.15em;
-      padding: 0.3rem 0.8rem;
-      border-radius: 2px;
-      margin-bottom: 0.5rem;
-      text-transform: uppercase;
-    }
+.badge {
+  display: inline-block;
+  border: 1px solid var(--green-dim);
+  color: var(--green-dim);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  padding: 0.3rem 0.8rem;
+  border-radius: 2px;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
 
 .badge:last-of-type {
   margin-bottom: 2.5rem;
 }
 
-    h1 {
-      font-size: clamp(2.2rem, 8vw, 3.8rem);
-      color: var(--green);
-      letter-spacing: -0.02em;
-      line-height: 1.1;
-      margin-bottom: 1rem;
-      text-shadow: 0 0 40px rgba(0,255,0,0.3);
-    }
+h1 {
+  font-size: clamp(2.2rem, 8vw, 3.8rem);
+  color: var(--green);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 40px rgba(0, 255, 0, 0.3);
+}
 
-    h1 span {
-      color: #fff;
-    }
-  
+h1 span {
+  color: #fff;
+}
+
 .tagline {
   font-size: clamp(0.85rem, 2.5vw, 1rem);
   color: var(--text);
@@ -85,10 +59,9 @@ body {
   margin-right: auto;
 }
 
-/* Terminal install block  */
 .terminal {
   background: var(--bg2);
-  border: 1px solid rgba(0,255,0,0.2);
+  border: 1px solid rgba(0, 255, 0, 0.2);
   border-radius: 6px;
   padding: 1.2rem 1.5rem;
   margin-bottom: 2.5rem;
@@ -106,8 +79,8 @@ body {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: rgba(0,255,0,0.15);
-  border: 1px solid rgba(0,255,0,0.2);
+  background: rgba(0, 255, 0, 0.15);
+  border: 1px solid rgba(0, 255, 0, 0.2);
 }
 
 .install-line {
@@ -119,18 +92,18 @@ body {
 
 .install-cmd {
   color: var(--green);
-  font-size: clamp(0.85rem, 2.5vw,  1rem);
+  font-size: clamp(0.85rem, 2.5vw, 1rem);
   letter-spacing: 0.02em;
 }
 
 .install-cmd .prompt {
-  color: rgba(0,255,0,0.4);
+  color: rgba(0, 255, 0, 0.4);
   margin-right: 0.5rem;
 }
 
 .copy-btn {
   background: none;
-  border: 1px solid rgba(0,255,0,0.3);
+  border: 1px solid rgba(0, 255, 0, 0.3);
   color: var(--green-dim);
   font-family: inherit;
   font-size: 0.75rem;
@@ -148,7 +121,6 @@ body {
   color: var(--green);
 }
 
-/* Features */
 .features {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -158,7 +130,7 @@ body {
 }
 
 .feature {
-  border: 1px solid rgba(0,255,0,0.1);
+  border: 1px solid rgba(0, 255, 0, 0.1);
   border-radius: 4px;
   padding: 1rem;
   background: var(--green-muted);
@@ -183,10 +155,9 @@ body {
   line-height: 1.5;
 }
 
-/* Security note */
 .security {
   font-size: 0.72rem;
-  color: rgba(0,255,0,0.4);
+  color: rgba(0, 255, 0, 0.4);
   letter-spacing: 0.08em;
   margin-bottom: 3rem;
 }
@@ -195,7 +166,6 @@ body {
   content: '◈ ';
 }
 
-/* Links  */
 .links {
   display: flex;
   gap: 1.5rem;
@@ -211,12 +181,8 @@ body {
   transition: color 0.2s;
 }
 
-.links a:hover { color: var(--green); }
-
-/* Cursor blink */
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+.links a:hover {
+  color: var(--green);
 }
 
 .cursor {
