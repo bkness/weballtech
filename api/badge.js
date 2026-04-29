@@ -34,7 +34,7 @@ function buildSVG({ online, last_seen }, forged) {
   const scanner = forged?.scanner;
   const shell   = forged?.shell;
 
-  const scanColor  = !scanner ? '#4a7a55' : scanner.safe ? '#00ff41' : '#cc3333';
+  const scanColor  = !online ? '#4a7a55' : !scanner ? '#4a7a55' : scanner.safe ? '#00ff41' : '#cc3333';
   const scanText   = !scanner ? '— —' : scanner.safe
     ? `SAFE &#183; ${scanner.packages} pkgs`
     : `${scanner.flagged.length} FLAGGED &#183; ${scanner.packages} pkgs`;
