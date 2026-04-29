@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&family=Exo+2:wght@300;400;600&display=swap');
+
+:root {
+  --green: #00ff41;
+  --green-dim: #00ff4115;
+  --green-mid: #00ff4130;
+  --green-muted: rgba(0, 255, 65, 0.12);
+  --bg: #030a06;
+  --bg2: #050505;
+  --grid: #0d1f12;
+  --text: #c8ffd4;
+  --muted: #4a7a55;
+  --border: #1a3a22;
+  --go: #00ADD8;
+  --go-dim: #00add820;
+  --rust: #FF4500;
+  --rust-dim: #ff450020;
+  --py: #FFD43B;
+  --py-dim: #ffd43b20;
+  --warn: #ff9966;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 40px 40px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Green glow */
+body::after {
+  content: '';
+  position: fixed;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 500px;
+  background: radial-gradient(ellipse, #00ff4110 0%, transparent 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
