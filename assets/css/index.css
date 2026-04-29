@@ -78,13 +78,10 @@ h1 span {
   margin-bottom: 1rem;
 }
 
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgba(0, 255, 0, 0.15);
-  border: 1px solid rgba(0, 255, 0, 0.2);
-}
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot.r { background: var(--rust); }
+.dot.y { background: var(--py);}
+.dot.g { background: var(--green); }
 
 .install-line {
   display: flex;
