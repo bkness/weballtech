@@ -18,6 +18,13 @@
   --py: #FFD43B;
   --py-dim: #ffd43b20;
   --warn: #ff9966;
+
+  --Tech: 'Share Tech Mono', monospace;
+  --Code: 'Orbitron', monospace;
+  --UI: 'Exo 2', sans-serif;
+
+  --anim-down: fadeDown 0.6s ease both;
+  --anim-up: fadeUp 0.6s ease both;
 }
 
 *, *::before, *::after {
