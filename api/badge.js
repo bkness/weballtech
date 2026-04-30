@@ -1,4 +1,5 @@
 const Redis = require('ioredis');
+const { fontFace } = require('../lib/fonts');
 
 let client;
 function getClient() {
@@ -42,8 +43,9 @@ function buildSVG({ online, last_seen }, forged) {
 
   const shellText  = shell ? `v${shell.version} &#183; ${shell.plugins} plugins &#183; ${shell.hooks} hooks` : '— —';
 
+  const stm = "'Share Tech Mono',monospace";
   return `<svg width="380" height="120" viewBox="0 0 380 120" xmlns="http://www.w3.org/2000/svg">
-  <defs><style>${pulse}</style></defs>
+  <defs><style>${fontFace}${pulse}</style></defs>
   <rect width="380" height="120" rx="4" fill="#030a06"/>
   <rect width="379" height="119" x="0.5" y="0.5" rx="4" fill="none" stroke="${border}" stroke-width="1"/>
   <rect width="3" height="120" rx="1" fill="${color}"/>
@@ -52,18 +54,18 @@ function buildSVG({ online, last_seen }, forged) {
   <line x1="3" y1="82" x2="379" y2="82" stroke="#0d1f12" stroke-width="1"/>
 
   <circle cx="28" cy="21" r="5" fill="${dotColor}" class="dot"/>
-  <text x="44" y="18" font-family="'Courier New',monospace" font-size="10" fill="#4a7a55" letter-spacing="3">FORGED DEV ENV</text>
-  <text x="44" y="33" font-family="'Courier New',monospace" font-size="16" font-weight="bold" fill="${color}" letter-spacing="1">BKNESS</text>
-  <text x="372" y="20" font-family="'Courier New',monospace" font-size="10" fill="${dotColor}" text-anchor="end" letter-spacing="2">${statusText}</text>
-  <text x="372" y="34" font-family="'Courier New',monospace" font-size="9" fill="#4a7a55" text-anchor="end">${timeText}</text>
+  <text x="44" y="18" font-family="${stm}" font-size="10" fill="#4a7a55" letter-spacing="3">FORGED DEV ENV</text>
+  <text x="44" y="33" font-family="${stm}" font-size="16" fill="${color}" letter-spacing="1">BKNESS</text>
+  <text x="372" y="20" font-family="${stm}" font-size="10" fill="${dotColor}" text-anchor="end" letter-spacing="2">${statusText}</text>
+  <text x="372" y="34" font-family="${stm}" font-size="9" fill="#4a7a55" text-anchor="end">${timeText}</text>
 
-  <text x="16" y="58" font-family="'Courier New',monospace" font-size="9" fill="#4a7a55" letter-spacing="2">&#9670; SCANNER</text>
-  <text x="372" y="58" font-family="'Courier New',monospace" font-size="9" fill="${scanColor}" text-anchor="end">${scanText}${scanAge ? ` &#183; ${scanAge}` : ''}</text>
+  <text x="16" y="58" font-family="${stm}" font-size="9" fill="#4a7a55" letter-spacing="2">&#9670; SCANNER</text>
+  <text x="372" y="58" font-family="${stm}" font-size="9" fill="${scanColor}" text-anchor="end">${scanText}${scanAge ? ` &#183; ${scanAge}` : ''}</text>
 
-  <text x="16" y="98" font-family="'Courier New',monospace" font-size="9" fill="#4a7a55" letter-spacing="2">&#9650; SHELL</text>
-  <text x="372" y="98" font-family="'Courier New',monospace" font-size="9" fill="#4a7a55" text-anchor="end">${shellText}</text>
-  <text x="16" y="112" font-family="'Courier New',monospace" font-size="8" fill="#1a3a22" letter-spacing="1">weballtech.com</text>
-  <text x="372" y="112" font-family="'Courier New',monospace" font-size="8" fill="#1a3a22" text-anchor="end">forged-cli</text>
+  <text x="16" y="98" font-family="${stm}" font-size="9" fill="#4a7a55" letter-spacing="2">&#9650; SHELL</text>
+  <text x="372" y="98" font-family="${stm}" font-size="9" fill="#4a7a55" text-anchor="end">${shellText}</text>
+  <text x="16" y="112" font-family="${stm}" font-size="8" fill="#1a3a22" letter-spacing="1">weballtech.com</text>
+  <text x="372" y="112" font-family="${stm}" font-size="8" fill="#1a3a22" text-anchor="end">forged-cli</text>
 </svg>`;
 }
 
