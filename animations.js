@@ -5,7 +5,7 @@ const FONTS = {
     monospace: "'Courier New', Courier, monospace",
     sans: "'Segoe UI', Ubuntu, sans-serif",
     serif: "Georgia, 'Times New Roman', serif",
-    code: "'Fira Code', 'JetBrains Mono', monospace",
+    code: "'Share Tech Mono', 'Fira Code', 'JetBrains Mono', monospace",
 };
 
 const getAnimation = (type, {
