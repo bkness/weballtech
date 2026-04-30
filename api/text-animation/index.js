@@ -7,7 +7,7 @@ const FONTS = {
     code:      "'Share Tech Mono', monospace",
 };
 
-const VALID = ['typing','glitch','neon','wave','blink','blur','bounce','fade','flip','float','matrix','pop','pulse','rainbow','shake','skew','slide','stroke','swing','zoom'];
+const VALID = ['typing','glitch','neon','wave','reveal','blink','blur','bounce','fade','flip','float','matrix','pop','pulse','rainbow','shake','skew','slide','stroke','swing','zoom'];
 
 function clamp01(v) { return Math.min(1, Math.max(0, v)); }
 
@@ -95,6 +95,62 @@ const animations = {
             <feGaussianBlur stdDeviation="3" result="blur"/>
             <feComposite in="SourceGraphic" in2="blur" operator="over"/>
         </filter></defs>${items}`;
+    },
+
+    reveal(ctx) {
+        const { lines, commonStyle, textColor, repeat, intWidth, intSize, center, lineY, pauseS, speedS } = ctx;
+        const cw       = intSize * 0.62;
+        const delay    = speedS;
+        const totalCh  = lines.reduce((s, l) => s + l.length, 0);
+        const revealT  = totalCh * delay;
+        const fadeT    = 0.4;
+        const cycleT   = revealT + pauseS + fadeT;
+        const fid      = `rg_${Math.random().toString(36).slice(2,7)}`;
+        const c        = v => Math.min(1, Math.max(0, v)).toFixed(4);
+        const holdFrac = c((revealT + pauseS) / cycleT);
+
+        let ci = 0;
+        const charEls = lines.map((line, row) => {
+            const sx = center ? (intWidth - line.length * cw) / 2 : 20;
+            return line.split('').map((ch, i) => {
+                const t   = ci++ * delay;
+                const t0  = c(Math.max(0.0001, t / cycleT));
+                const t1  = c(Math.min((t + delay * 0.1) / cycleT, (revealT + pauseS * 0.5) / cycleT));
+                const anim = repeat
+                    ? `<animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;${t0};${t1};${holdFrac};1" dur="${cycleT}s" repeatCount="indefinite"/>`
+                    : `<animate attributeName="opacity" values="0;1" dur="0.12s" begin="${t.toFixed(3)}s" fill="freeze"/>`;
+                return `<text x="${(sx + i * cw).toFixed(1)}" y="${lineY(row)}" style="${commonStyle}" filter="url(#${fid})" opacity="0">${anim}${ch}</text>`;
+            }).join('');
+        }).join('');
+
+        // Blinking cursor after last line
+        const lastLine  = lines[lines.length - 1];
+        const cursorX   = (center ? (intWidth - lastLine.length * cw) / 2 : 20) + lastLine.length * cw + 3;
+        const cursorH   = Math.round(intSize * 0.82);
+        const cursorTop = lineY(lines.length - 1) - intSize + Math.round(intSize * 0.15);
+
+        let cursorAnim;
+        if (repeat) {
+            const blinks = Math.max(2, Math.floor(pauseS / 0.6));
+            const bp = pauseS / blinks;
+            const vals  = ['0', '0'];
+            const times = ['0', c((revealT + 0.01) / cycleT)];
+            for (let b = 0; b < blinks; b++) {
+                const on  = revealT + b * bp + 0.01;
+                const off = on + bp * 0.5;
+                vals.push('1', '0');
+                times.push(c(on / cycleT), c(off / cycleT));
+            }
+            vals.push('0'); times.push('1');
+            cursorAnim = `<animate attributeName="opacity" values="${vals.join(';')}" keyTimes="${times.join(';')}" dur="${cycleT}s" repeatCount="indefinite"/>`;
+        } else {
+            cursorAnim = `<animate attributeName="opacity" values="1;1;0;1;1;0" keyTimes="0;0.45;0.5;0.55;0.95;1" dur="1.2s" begin="${revealT.toFixed(3)}s" repeatCount="indefinite"/>`;
+        }
+
+        return `<defs><filter id="${fid}" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="2" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter></defs>${charEls}<rect x="${cursorX.toFixed(1)}" y="${cursorTop}" width="2" height="${cursorH}" fill="${textColor}" filter="url(#${fid})" opacity="0">${cursorAnim}</rect>`;
     },
 
     blink(ctx) {
@@ -291,7 +347,7 @@ module.exports = (req, res) => {
         width = '435', height = '50', font = 'code',
         background = '00000000', center = 'false', vCenter = 'false',
         multiline = 'false', letterSpacing = 'normal',
-        repeat = 'true', separator = ';',
+        repeat = 'true', separator = ';', speed = '180',
     } = req.query;
 
     const lines = raw.split(separator)
@@ -309,6 +365,7 @@ module.exports = (req, res) => {
     const animType  = VALID.includes(animation) ? animation : 'typing';
     const isCentered = center === 'true';
 
+    const speedS    = Math.min(Math.max(parseInt(speed) || 180, 30), 1000) / 1000;
     const lineDurS  = intDur / 1000;
     const pauseS    = intPause / 1000;
     const slotS     = lineDurS + pauseS;
@@ -329,7 +386,7 @@ module.exports = (req, res) => {
         textAnchor: isCentered ? 'middle' : 'start',
         commonStyle: `font-family:${FONTS[font]||FONTS.monospace};font-weight:${font==='code'?'normal':'bold'};font-size:${intSize}px;fill:#${safeColor};letter-spacing:${letterSpacing||'normal'};`,
         center: isCentered, repeat: isRepeat,
-        lineDurS, pauseS, slotS, cycleDurS, lineY, seqOp,
+        lineDurS, pauseS, slotS, cycleDurS, speedS, lineY, seqOp,
     });
 
     res.setHeader('Content-Type', 'image/svg+xml');
