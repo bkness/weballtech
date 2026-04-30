@@ -2,7 +2,7 @@ const FONTS = {
     monospace: "'Courier New', Courier, monospace",
     sans:      "'Segoe UI', Ubuntu, sans-serif",
     serif:     "Georgia, 'Times New Roman', serif",
-    code:      "'Fira Code', 'JetBrains Mono', monospace",
+    code:      "'Share Tech Mono', 'Fira Code', 'JetBrains Mono', monospace",
 };
 
 const VALID = ['typing', 'glitch', 'neon', 'wave'];
@@ -118,7 +118,7 @@ module.exports = (req, res) => {
     const {
         lines: raw = 'Hello+World!', color = '36BCF7', size = '20',
         animation = 'typing', duration = '5000', pause = '1000',
-        width = '435', height = '50', font = 'monospace',
+        width = '435', height = '50', font = 'code',
         background = '00000000', center = 'false', vCenter = 'false',
         multiline = 'false', letterSpacing = 'normal',
         repeat = 'true', separator = ';',
