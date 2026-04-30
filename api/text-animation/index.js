@@ -159,7 +159,7 @@ module.exports = (req, res) => {
         lines, textColor: `#${safeColor}`, intSize, intWidth, intHeight,
         textX: isCentered ? '50%' : '20',
         textAnchor: isCentered ? 'middle' : 'start',
-        commonStyle: `font-family:${FONTS[font]||FONTS.monospace};font-weight:bold;font-size:${intSize}px;fill:#${safeColor};letter-spacing:${letterSpacing||'normal'};`,
+        commonStyle: `font-family:${FONTS[font]||FONTS.monospace};font-weight:${font==='code'?'normal':'bold'};font-size:${intSize}px;fill:#${safeColor};letter-spacing:${letterSpacing||'normal'};`,
         center: isCentered, repeat: isRepeat,
         lineDurS, pauseS, slotS, cycleDurS, lineY, seqOp,
     });
