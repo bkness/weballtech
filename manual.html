@@ -15,7 +15,7 @@
     <div class="header-eyebrow">// user guide &amp; command reference</div>
     <h1>⚒ devforge</h1>
     <div class="subtitle">YOUR DEVELOPER COCKPIT — MODULAR · FAST · EXPRESSIVE</div>
-    <div class="version-badge">v0.3.8 — now on npm</div>
+    <div class="version-badge">v0.3.9 — now on npm</div>
   </header>
 
   <!-- ═══ INSTALLATION ═══ -->
@@ -279,6 +279,10 @@
           <span class="cmd-desc">file explorer widget — tab to enter dirs, shift+tab to go up, enter to cd or insert path.</span>
         </div>
         <div class="cmd-row shortcut-row">
+          <span class="cmd"><kbd>Ctrl+G</kbd></span>
+          <span class="cmd-desc">GitHub workflow — stage files, commit, open PRs, create issues with labels + assignee, auto-creates project board. The full issue → branch → PR loop without leaving the terminal.</span>
+        </div>
+        <div class="cmd-row shortcut-row">
           <span class="cmd"><kbd>Ctrl+D</kbd></span>
           <span class="cmd-desc">project dashboard — full UI with open, create, recent, GitHub, cache ops.</span>
         </div>
@@ -406,7 +410,45 @@
   </div>
 
   <!-- ═══ GITHUB DASHBOARD ═══ -->
-  <div class="section-header">06 // github dashboard</div>
+  <div class="section-header">06 // github dashboard &amp; issue workflow</div>
+
+  <div class="card accent-green" style="margin-bottom:16px">
+    <div class="card-header">
+      <div class="card-icon">⌨️</div>
+      <div>
+        <div class="card-title">Ctrl+G — issue → branch → PR loop</div>
+        <div class="card-subtitle">THE FULL WORKFLOW WITHOUT LEAVING THE TERMINAL</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="plugin-flow">
+        <div class="plugin-step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">Create Issue</div>
+            <div class="step-detail">Title → Body → Labels (Tab multi-select) → Assignee → Branch type — auto-creates <code>fix/42-my-issue</code>, sets status to In Progress, creates project board if none exists</div>
+          </div>
+        </div>
+        <div class="plugin-step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">Stage &amp; Commit</div>
+            <div class="step-detail">Ctrl+G → Stage &amp; Commit — fuzzy-pick changed files, enter commit message, done</div>
+          </div>
+        </div>
+        <div class="plugin-step" style="border-bottom:none">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">Open PR</div>
+            <div class="step-detail">Ctrl+G → Open PR — pushes branch, pre-fills PR body with <code>Closes #42</code> (detected from branch name), sets status to In Review. Merge → issue closes automatically.</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <div class="tip">💡 One-time setup: run <code>gh auth refresh -s project</code> to grant Projects v2 scope. After that, project boards are created and linked automatically for every repo.</div>
+      </div>
+    </div>
+  </div>
 
   <div class="grid-2">
 
