@@ -7,7 +7,7 @@ const FONTS = {
     code:      "'Share Tech Mono', monospace",
 };
 
-const VALID = ['typing', 'glitch', 'neon', 'wave'];
+const VALID = ['typing','glitch','neon','wave','blink','blur','bounce','fade','flip','float','matrix','pop','pulse','rainbow','shake','skew','slide','stroke','swing','zoom'];
 
 function clamp01(v) { return Math.min(1, Math.max(0, v)); }
 
@@ -95,6 +95,174 @@ const animations = {
             <feGaussianBlur stdDeviation="3" result="blur"/>
             <feComposite in="SourceGraphic" in2="blur" operator="over"/>
         </filter></defs>${items}`;
+    },
+
+    blink(ctx) {
+        const { lines, textX, textAnchor, commonStyle, repeat, lineDurS, lineY, seqOp } = ctx;
+        return lines.map((line, i) => `<text x="${textX}" y="${lineY(i)}" text-anchor="${textAnchor}" style="${commonStyle}" opacity="0">
+            ${seqOp(i)}
+            <animate attributeName="opacity" values="1;0;1" keyTimes="0;0.5;1" calcMode="discrete" dur="${lineDurS}s" begin="${(i * ctx.slotS).toFixed(3)}s" repeatCount="${repeat ? 'indefinite' : '1'}" />
+            ${line}
+        </text>`).join('');
+    },
+
+    blur(ctx) {
+        const { lines, textX, textAnchor, commonStyle, repeat, lineDurS, lineY, seqOp } = ctx;
+        const fb = `blur_${Math.random().toString(36).slice(2,7)}`;
+        const defs = lines.map((_, i) => `<filter id="${fb}_${i}">
+            <feGaussianBlur stdDeviation="8;0;0;8">
+                <animate attributeName="stdDeviation" values="10;0;0;10" keyTimes="0;0.25;0.75;1" dur="${lineDurS}s" begin="${(i * ctx.slotS).toFixed(3)}s" repeatCount="${repeat ? 'indefinite' : '1'}" />
+            </feGaussianBlur>
+        </filter>`).join('');
+        const items = lines.map((line, i) => `<text x="${textX}" y="${lineY(i)}" text-anchor="${textAnchor}" style="${commonStyle}" filter="url(#${fb}_${i})" opacity="0">
+            ${seqOp(i)}${line}
+        </text>`).join('');
+        return `<defs>${defs}</defs>${items}`;
+    },
+
+    bounce(ctx) {
+        const { lines, textX, textAnchor, commonStyle, repeat, lineDurS, intSize, lineY, seqOp } = ctx;
+        return lines.map((line, i) => `<text x="${textX}" y="${lineY(i)}" text-anchor="${textAnchor}" style="${commonStyle}" opacity="0">
+            ${seqOp(i)}
+            <animateTransform attributeName="transform" type="translate" values="0,0;0,-${Math.round(intSize*0.45)};0,0;0,-${Math.round(intSize*0.18)};0,0" keyTimes="0;0.25;0.5;0.75;1" dur="${lineDurS}s" begin="${(i*ctx.slotS).toFixed(3)}s" repeatCount="${repeat?'indefinite':'1'}" />
+            ${line}
+        </text>`).join('');
+    },
+
+    fade(ctx) {
+        const { lines, textX, textAnchor, commonStyle, repeat, lineDurS, lineY, seqOp } = ctx;
+        return lines.map((line, i) => `<text x="${textX}" y="${lineY(i)}" text-anchor="${textAnchor}" style="${commonStyle}" opacity="0">
+            ${seqOp(i)}
+            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" dur="${lineDurS}s" begin="${(i*ctx.slotS).toFixed(3)}s" repeatCount="${repeat?'indefinite':'1'}" />
+            ${line}
+        </text>`).join('');
+    },
+
+    flip(ctx) {
+        const { lines, textX, textAnchor, commonStyle, repeat, lineDurS, intWidth, lineY, seqOp } = ctx;
+        return lines.map((line, i) => `<text x="${textX}" y="${lineY(i)}" text-anchor="${textAnchor}" style="${commonStyle}" opacity="0">
+            ${seqOp(i)}
+            <animateTransform attributeName="transform" type="rotate" values="90 ${intWidth/2} ${lineY(i)};0 ${intWidth/2} ${lineY(i)};0 ${intWidth/2} ${lineY(i)};-90 ${intWidth/2} ${lineY(i)}" keyTimes="0;0.1;0.8;1" dur="${lineDurS}s" begin="${(i*ctx.slotS).toFixed(3)}s" repeatCount="${repeat?'indefinite':'1'}" fill="freeze" />
+            ${line}
+        </text>`).join('');
+    },
+
+    float(ctx) {
+        const { lines, textX, textAnchor, commonStyle, repeat, lineDurS, intSize, lineY, seqOp } = ctx;
+        const offset = (intSize * 0.4).toFixed(2);
+        return lines.map((line, i) => `<text x="${textX}" y="${lineY(i)}" text-anchor="${textAnchor}" style="${commonStyle}" opacity="0">
+            ${seqOp(i)}
+            <animateTransform attributeName="transform" type="translate" values="0,${offset};0,-${offset};0,${offset}" dur="${Math.max(0.5,lineDurS*0.9)}s" begin="${(i*ctx.slotS).toFixed(3)}s" repeatCount="${repeat?'indefinite':'1'}" />
+            ${line}
+        </text>`).join('');
+    },
+
+    matrix(ctx) {
+        const { lines, intSize, intWidth, intHeight, commonStyle, repeat, lineDurS, lineY, seqOp } = ctx;
+        const source = lines.join(' ');
+        const pool = source.split('').concat(['0','1','#','@','!','$','%','^','&','*']);
+        const cols = Math.floor(intWidth / (intSize * 0.6));
+        return lines.map((_, i) => {
+            let drops = `<g opacity="0">${seqOp(i)}`;
+            for (let c = 0; c < Math.min(cols, 30); c++) {
+                const x = c * (intSize * 0.6) + (intSize * 0.3);
+                const ch = pool[(c + i) % pool.length];
+                const delay = (i * ctx.slotS + (c / Math.max(cols,1)) * lineDurS * 0.35).toFixed(3);
+                drops += `<text x="${x}" y="0" style="${commonStyle}" font-size="${Math.max(10,intSize-4)}px" opacity="0.8">
+                    <animateTransform attributeName="transform" type="translate" values="0,-${intSize};0,${intHeight+intSize}" dur="${Math.max(0.4,lineDurS*0.6).toFixed(2)}s" begin="${delay}s" repeatCount="${repeat?'indefinite':'1'}" />
+                    <animate attributeName="opacity" values="0;0.9;0.4;0.9;0" dur="${Math.max(0.35,lineDurS*0.5).toFixed(2)}s" begin="${delay}s" repeatCount="${repeat?'indefinite':'1'}" />
+                    ${ch}
+                </text>`;
+            }
+            return `${drops}</g>`;
+        }).join('');
+    },
+
+    pop(ctx) {
+        const { lines, textX, textAnchor, commonStyle, repeat, lineDurS, lineY, seqOp } = ctx;
+        return lines.map((line, i) => `<text x="${textX}" y="${lineY(i)}" text-anchor="${textAnchor}" style="${commonStyle}" opacity="0">
+            ${seqOp(i)}
+            <animateTransform attributeName="transform" type="scale" values="0.6;1.12;1" dur="${Math.max(0.2,lineDurS*0.5)}s" begin="${(i*ctx.slotS).toFixed(3)}s" additive="replace" repeatCount="${repeat?'indefinite':'1'}" />
+            ${line}
+        </text>`).join('');
+    },
+
+    pulse(ctx) {
+        const { lines, textX, textAnchor, commonStyle, repeat, lineDurS, intWidth, center, lineY, seqOp } = ctx;
+        const cx = center ? intWidth / 2 : 20;
+        return lines.map((line, i) => `<text x="${textX}" y="${lineY(i)}" text-anchor="${textAnchor}" style="${commonStyle}" opacity="0" transform-origin="${cx} ${lineY(i)}">
+            ${seqOp(i)}
+            <animateTransform attributeName="transform" type="scale" values="1;1.08;1;0.96;1" keyTimes="0;0.3;0.5;0.75;1" additive="sum" dur="${lineDurS}s" begin="${(i*ctx.slotS).toFixed(3)}s" repeatCount="${repeat?'indefinite':'1'}" />
+            ${line}
+        </text>`).join('');
+    },
+
+    rainbow(ctx) {
+        const { lines, textX, textAnchor, commonStyle, repeat, lineDurS, textColor, lineY, seqOp } = ctx;
+        return lines.map((line, i) => `<text x="${textX}" y="${lineY(i)}" text-anchor="${textAnchor}" style="${commonStyle}" opacity="0">
+            ${seqOp(i)}
+            <animate attributeName="fill" values="${textColor};#ff0040;#ff8c00;#ffef00;#00dd44;#0088ff;#7700ff;${textColor}" dur="${lineDurS}s" begin="${(i*ctx.slotS).toFixed(3)}s" repeatCount="${repeat?'indefinite':'1'}" />
+            ${line}
+        </text>`).join('');
+    },
+
+    shake(ctx) {
+        const { lines, textX, textAnchor, commonStyle, repeat, lineDurS, lineY, seqOp } = ctx;
+        return lines.map((line, i) => `<text x="${textX}" y="${lineY(i)}" text-anchor="${textAnchor}" style="${commonStyle}" opacity="0">
+            ${seqOp(i)}
+            <animateTransform attributeName="transform" type="translate" values="0,0;-2,1;2,-1;-3,2;3,-2;-2,1;2,-1;0,0" dur="${Math.max(0.35,lineDurS*0.22)}s" begin="${(i*ctx.slotS).toFixed(3)}s" repeatCount="${repeat?'indefinite':'1'}" />
+            ${line}
+        </text>`).join('');
+    },
+
+    skew(ctx) {
+        const { lines, textX, textAnchor, commonStyle, repeat, lineDurS, lineY, seqOp } = ctx;
+        return lines.map((line, i) => `<text x="${textX}" y="${lineY(i)}" text-anchor="${textAnchor}" style="${commonStyle}" opacity="0">
+            ${seqOp(i)}
+            <animateTransform attributeName="transform" type="skewX" values="0;14;-10;0" dur="${Math.max(0.35,lineDurS*0.65)}s" begin="${(i*ctx.slotS).toFixed(3)}s" repeatCount="${repeat?'indefinite':'1'}" />
+            ${line}
+        </text>`).join('');
+    },
+
+    slide(ctx) {
+        const { lines, textX, textAnchor, commonStyle, repeat, lineDurS, intSize, lineY, seqOp } = ctx;
+        return lines.map((line, i) => `<text x="${textX}" y="${lineY(i)}" text-anchor="${textAnchor}" style="${commonStyle}" opacity="0">
+            ${seqOp(i)}
+            <animateTransform attributeName="transform" type="translate" values="0,${Math.round(intSize*0.7)};0,0;0,0;0,-${Math.round(intSize*0.5)}" keyTimes="0;0.2;0.8;1" dur="${lineDurS}s" begin="${(i*ctx.slotS).toFixed(3)}s" repeatCount="${repeat?'indefinite':'1'}" />
+            ${line}
+        </text>`).join('');
+    },
+
+    stroke(ctx) {
+        const { lines, textX, textAnchor, commonStyle, repeat, lineDurS, intSize, textColor, lineY, seqOp } = ctx;
+        return lines.map((line, i) => {
+            const dashLen = Math.max(600, line.length * intSize * 0.7);
+            return `<text x="${textX}" y="${lineY(i)}" text-anchor="${textAnchor}" style="${commonStyle}" fill="none" stroke="${textColor}" stroke-width="1.5" stroke-dasharray="${dashLen}" stroke-dashoffset="${dashLen}" opacity="0">
+                ${seqOp(i)}
+                <animate attributeName="stroke-dashoffset" values="${dashLen};0" dur="${lineDurS}s" begin="${(i*ctx.slotS).toFixed(3)}s" fill="freeze" repeatCount="${repeat?'indefinite':'1'}" />
+                <animate attributeName="fill" values="transparent;${textColor}" keyTimes="0;1" dur="${lineDurS}s" begin="${(i*ctx.slotS).toFixed(3)}s" fill="freeze" repeatCount="${repeat?'indefinite':'1'}" />
+                ${line}
+            </text>`;
+        }).join('');
+    },
+
+    swing(ctx) {
+        const { lines, textX, textAnchor, commonStyle, repeat, lineDurS, lineY, seqOp } = ctx;
+        return lines.map((line, i) => `<text x="${textX}" y="${lineY(i)}" text-anchor="${textAnchor}" style="${commonStyle}" opacity="0">
+            ${seqOp(i)}
+            <animateTransform attributeName="transform" type="rotate" values="-4 ${textX} ${lineY(i)};4 ${textX} ${lineY(i)};-3 ${textX} ${lineY(i)};0 ${textX} ${lineY(i)}" dur="${Math.max(0.4,lineDurS*0.7).toFixed(3)}s" begin="${(i*ctx.slotS).toFixed(3)}s" repeatCount="${repeat?'indefinite':'1'}" />
+            ${line}
+        </text>`).join('');
+    },
+
+    zoom(ctx) {
+        const { lines, textX, textAnchor, commonStyle, repeat, lineDurS, intWidth, lineY, seqOp } = ctx;
+        const cx = intWidth / 2;
+        return lines.map((line, i) => `<text x="${textX}" y="${lineY(i)}" text-anchor="${textAnchor}" style="${commonStyle}" transform-origin="${cx} ${lineY(i)}" opacity="0">
+            ${seqOp(i)}
+            <animateTransform attributeName="transform" type="scale" values="0.1;1;1;2" keyTimes="0;0.2;0.7;1" additive="sum" dur="${lineDurS}s" begin="${(i*ctx.slotS).toFixed(3)}s" repeatCount="${repeat?'indefinite':'1'}" />
+            ${line}
+        </text>`).join('');
     },
 
     wave(ctx) {
