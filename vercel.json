@@ -3,6 +3,10 @@
     {
       "path": "/api/snake",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/pacman",
+      "schedule": "0 0 * * *"
     }
   ]
 }
