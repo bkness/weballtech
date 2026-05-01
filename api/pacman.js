@@ -86,7 +86,7 @@ function countToColor(count) {
 
 // ── pacman path string ───────────────────────────────────────────────────────
 
-function pacmanSVG(path, STEP, HDR, R, DUR) {
+function pacmanD(path, STEP, HDR, R, DUR) {
   const total = path.length;
 
   const frames = path.map(([col, row], i) => {
@@ -222,7 +222,7 @@ function generateSVG(weeks, dark = true) {
     for (let row = 0; row < (grid[col]?.length ?? 0); row++) {
       const x = col * STEP;
       const y = HDR + row * STEP;
-     out += pacmanSVG(path, STEP, HDR, R, DUR);
+     out += pacmanD(path, STEP, HDR, R, DUR);
     }
   }
 
