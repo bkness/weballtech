@@ -76,7 +76,6 @@ function countToColor(count) {
 }
 
 // ── pac-man path shape ───────────────────────────────────────────────────────
-// dir: 0=right, 180=left | open: mouth open or closed
 
 function pacmanD(cx, cy, R, dir, open) {
   const angle = open ? Math.PI / 7 : 0.01;
@@ -93,19 +92,19 @@ function pacmanD(cx, cy, R, dir, open) {
 
 // ── ghost body path ──────────────────────────────────────────────────────────
 
-function ghostBodyD(CELL) {
-  const R  = CELL / 2;
-  const s1 = CELL / 3;
-  const s2 = (CELL * 2) / 3;
-  const pk = CELL * 0.72;
+function ghostBodyD(SZ) {
+  const R  = SZ / 2;
+  const s1 = SZ / 3;
+  const s2 = (SZ * 2) / 3;
+  const pk = SZ * 0.72;
   return [
-    `M0,${CELL}`,
+    `M0,${SZ}`,
     `L0,${R}`,
-    `A${R},${R} 0 0,1 ${CELL},${R}`,
-    `L${CELL},${CELL}`,
-    `Q${(s2 + s1 / 2).toFixed(2)},${pk.toFixed(2)} ${s2.toFixed(2)},${CELL}`,
-    `Q${(s1 + s1 / 2).toFixed(2)},${pk.toFixed(2)} ${s1.toFixed(2)},${CELL}`,
-    `Q${(s1 / 2).toFixed(2)},${pk.toFixed(2)} 0,${CELL}`,
+    `A${R},${R} 0 0,1 ${SZ},${R}`,
+    `L${SZ},${SZ}`,
+    `Q${(s2 + s1 / 2).toFixed(2)},${pk.toFixed(2)} ${s2.toFixed(2)},${SZ}`,
+    `Q${(s1 + s1 / 2).toFixed(2)},${pk.toFixed(2)} ${s1.toFixed(2)},${SZ}`,
+    `Q${(s1 / 2).toFixed(2)},${pk.toFixed(2)} 0,${SZ}`,
     `Z`,
   ].join(' ');
 }
@@ -127,10 +126,10 @@ function ghostPositions(path, mode, COLS) {
   const CYCLE   = SCATTER + CHASE;
 
   const corners = {
-    blinky: [COLS - 2, 0],   // top-right
-    pinky:  [1,        0],   // top-left
-    inky:   [COLS - 2, 6],   // bottom-right
-    clyde:  [1,        6],   // bottom-left
+    blinky: [COLS - 2, 0],
+    pinky:  [1,        0],
+    inky:   [COLS - 2, 6],
+    clyde:  [1,        6],
   };
 
   return Array.from({ length: TOTAL }, (_, i) => {
@@ -140,20 +139,16 @@ function ghostPositions(path, mode, COLS) {
     switch (mode) {
       case 'blinky':
         return path[(i + TOTAL - 5) % TOTAL];
-
       case 'pinky':
         return path[(i + 4) % TOTAL];
-
       case 'inky':
         return path[(i + TOTAL - 12) % TOTAL];
-
       case 'clyde': {
         const myPos  = path[(i + TOTAL - 18) % TOTAL];
         const pacPos = path[i];
         const dist   = Math.abs(myPos[0] - pacPos[0]) + Math.abs(myPos[1] - pacPos[1]);
         return dist < 8 ? corners.clyde : myPos;
       }
-
       default:
         return path[(i + TOTAL - 8) % TOTAL];
     }
@@ -162,15 +157,18 @@ function ghostPositions(path, mode, COLS) {
 
 // ── ghost SVG element ────────────────────────────────────────────────────────
 
-function ghostSVG(positions, fill, DUR, STEP, HDR, CELL) {
-  const R      = CELL / 2;
-  const txVals = positions.map(([c, r]) => `${c * STEP} ${HDR + r * STEP}`).join(';');
-  const body   = ghostBodyD(CELL);
-  const ex1    = (R * 0.58).toFixed(1);
-  const ex2    = (R * 1.42).toFixed(1);
-  const ey     = (R * 0.72).toFixed(1);
-  const er     = (R * 0.42).toFixed(1);
-  const pr     = (R * 0.22).toFixed(1);
+function ghostSVG(positions, fill, DUR, STEP, HDR, SZ) {
+  const R      = SZ / 2;
+  const off    = (STEP - SZ) / 2;   // center ghost (slightly wider than grid cell)
+  const txVals = positions.map(([c, r]) =>
+    `${(c * STEP + off).toFixed(1)} ${(HDR + r * STEP + off).toFixed(1)}`
+  ).join(';');
+  const body   = ghostBodyD(SZ);
+  const ex1    = (R * 0.50).toFixed(1);
+  const ex2    = (R * 1.50).toFixed(1);
+  const ey     = (R * 0.68).toFixed(1);
+  const er     = (R * 0.38).toFixed(1);
+  const pr     = (R * 0.20).toFixed(1);
 
   return `<g>
   <animateTransform attributeName="transform" type="translate"
@@ -185,14 +183,14 @@ function ghostSVG(positions, fill, DUR, STEP, HDR, CELL) {
 
 // ── maze wall overlay ────────────────────────────────────────────────────────
 //
-// Renders the outer border, ghost house with pink door, and T-wall stubs
+// Outer border, ghost house with pink door, vertical pillars, and T-wall stubs
 // that evoke the classic Pac-Man maze without disrupting the grid layout.
 
-function mazeWalls(W, HDR, STEP, CELL, COLS) {
-  const C    = '#1a6fd4';   // classic Pac-Man blue
-  const sw   = 2;
+function mazeWalls(W, HDR, STEP, COLS) {
+  const C  = '#1a6fd4';
+  const sw = 2.5;
+  const lc = 'round';
 
-  // Ghost house: 5 cols wide, 3 rows tall, horizontally centred
   const ghCol = Math.floor(COLS / 2) - 2;
   const ghX   = ghCol * STEP;
   const ghY   = HDR + 2 * STEP;
@@ -203,35 +201,34 @@ function mazeWalls(W, HDR, STEP, CELL, COLS) {
 
   const lines = [
     // outer border
-    `<rect x="1" y="${HDR + 1}" width="${W - 2}" height="${7 * STEP - 2}" fill="none" stroke="${C}" stroke-width="3" rx="4"/>`,
+    `<rect x="1.5" y="${(HDR + 1.5).toFixed(1)}" width="${W - 3}" height="${(7 * STEP - 1).toFixed(1)}" fill="none" stroke="${C}" stroke-width="3" rx="6"/>`,
 
-    // ghost house sides + bottom
-    `<line x1="${ghX}"      y1="${ghY}"      x2="${ghX}"      y2="${ghY + ghH}" stroke="${C}" stroke-width="${sw}"/>`,
-    `<line x1="${ghX + ghW}" y1="${ghY}"     x2="${ghX + ghW}" y2="${ghY + ghH}" stroke="${C}" stroke-width="${sw}"/>`,
-    `<line x1="${ghX}"      y1="${ghY + ghH}" x2="${ghX + ghW}" y2="${ghY + ghH}" stroke="${C}" stroke-width="${sw}"/>`,
+    // ghost house — U-shape (sides + bottom)
+    `<path d="M${ghX},${ghY} L${ghX},${ghY + ghH} L${ghX + ghW},${ghY + ghH} L${ghX + ghW},${ghY}" fill="none" stroke="${C}" stroke-width="${sw}" stroke-linecap="${lc}" stroke-linejoin="round"/>`,
 
-    // ghost house top (split with door gap)
-    `<line x1="${ghX}"          y1="${ghY}" x2="${gapX}"          y2="${ghY}" stroke="${C}"       stroke-width="${sw}"/>`,
-    `<line x1="${gapX + gapW}"  y1="${ghY}" x2="${ghX + ghW}"     y2="${ghY}" stroke="${C}"       stroke-width="${sw}"/>`,
-    `<line x1="${gapX}"         y1="${ghY}" x2="${gapX + gapW}"   y2="${ghY}" stroke="#ff9ecf"   stroke-width="${sw}"/>`,
+    // ghost house door (pink centre segment)
+    `<line x1="${ghX}"          y1="${ghY}" x2="${gapX}"          y2="${ghY}" stroke="${C}"     stroke-width="${sw}"/>`,
+    `<line x1="${gapX + gapW}"  y1="${ghY}" x2="${ghX + ghW}"     y2="${ghY}" stroke="${C}"     stroke-width="${sw}"/>`,
+    `<line x1="${gapX}"         y1="${ghY}" x2="${gapX + gapW}"   y2="${ghY}" stroke="#ff9ecf" stroke-width="${sw + 0.5}"/>`,
 
-    // left vertical pillar (cols 4-5, rows 2-4)
-    `<line x1="${5 * STEP}" y1="${HDR + 2 * STEP}" x2="${5 * STEP}" y2="${HDR + 5 * STEP}" stroke="${C}" stroke-width="${sw}"/>`,
-
+    // left vertical pillar
+    `<line x1="${5.5 * STEP}" y1="${HDR + STEP * 1.5}" x2="${5.5 * STEP}" y2="${HDR + STEP * 5.5}" stroke="${C}" stroke-width="${sw}" stroke-linecap="${lc}"/>`,
     // right vertical pillar (mirror)
-    `<line x1="${(COLS - 6) * STEP + CELL}" y1="${HDR + 2 * STEP}" x2="${(COLS - 6) * STEP + CELL}" y2="${HDR + 5 * STEP}" stroke="${C}" stroke-width="${sw}"/>`,
+    `<line x1="${(COLS - 5.5) * STEP}" y1="${HDR + STEP * 1.5}" x2="${(COLS - 5.5) * STEP}" y2="${HDR + STEP * 5.5}" stroke="${C}" stroke-width="${sw}" stroke-linecap="${lc}"/>`,
 
     // upper-left horizontal stub
-    `<line x1="${6 * STEP}" y1="${HDR + 2 * STEP + STEP * 0.5}" x2="${10 * STEP}" y2="${HDR + 2 * STEP + STEP * 0.5}" stroke="${C}" stroke-width="${sw}"/>`,
-
+    `<line x1="${6.5 * STEP}" y1="${HDR + 2.5 * STEP}" x2="${10 * STEP}" y2="${HDR + 2.5 * STEP}" stroke="${C}" stroke-width="${sw}" stroke-linecap="${lc}"/>`,
     // upper-right horizontal stub
-    `<line x1="${(COLS - 11) * STEP}" y1="${HDR + 2 * STEP + STEP * 0.5}" x2="${(COLS - 7) * STEP}" y2="${HDR + 2 * STEP + STEP * 0.5}" stroke="${C}" stroke-width="${sw}"/>`,
+    `<line x1="${(COLS - 10) * STEP}" y1="${HDR + 2.5 * STEP}" x2="${(COLS - 6.5) * STEP}" y2="${HDR + 2.5 * STEP}" stroke="${C}" stroke-width="${sw}" stroke-linecap="${lc}"/>`,
 
     // lower-left horizontal stub
-    `<line x1="${6 * STEP}" y1="${HDR + 4 * STEP + STEP * 0.5}" x2="${10 * STEP}" y2="${HDR + 4 * STEP + STEP * 0.5}" stroke="${C}" stroke-width="${sw}"/>`,
-
+    `<line x1="${6.5 * STEP}" y1="${HDR + 4.5 * STEP}" x2="${10 * STEP}" y2="${HDR + 4.5 * STEP}" stroke="${C}" stroke-width="${sw}" stroke-linecap="${lc}"/>`,
     // lower-right horizontal stub
-    `<line x1="${(COLS - 11) * STEP}" y1="${HDR + 4 * STEP + STEP * 0.5}" x2="${(COLS - 7) * STEP}" y2="${HDR + 4 * STEP + STEP * 0.5}" stroke="${C}" stroke-width="${sw}"/>`,
+    `<line x1="${(COLS - 10) * STEP}" y1="${HDR + 4.5 * STEP}" x2="${(COLS - 6.5) * STEP}" y2="${HDR + 4.5 * STEP}" stroke="${C}" stroke-width="${sw}" stroke-linecap="${lc}"/>`,
+
+    // flanking stubs beside ghost house
+    `<line x1="${ghX - 2.5 * STEP}" y1="${HDR + 3.5 * STEP}" x2="${ghX - 0.5 * STEP}" y2="${HDR + 3.5 * STEP}" stroke="${C}" stroke-width="${sw}" stroke-linecap="${lc}"/>`,
+    `<line x1="${ghX + ghW + 0.5 * STEP}" y1="${HDR + 3.5 * STEP}" x2="${ghX + ghW + 2.5 * STEP}" y2="${HDR + 3.5 * STEP}" stroke="${C}" stroke-width="${sw}" stroke-linecap="${lc}"/>`,
   ];
 
   return lines.join('\n');
@@ -240,25 +237,34 @@ function mazeWalls(W, HDR, STEP, CELL, COLS) {
 // ── svg generation ───────────────────────────────────────────────────────────
 
 function generateSVG(weeks, dark = true) {
-  const CELL  = 11;
-  const GAP   = 2;
-  const STEP  = CELL + GAP;
-  const R     = CELL / 2;
-  const HDR   = 15;
+  const CELL     = 11;
+  const GAP      = 2;
+  const STEP     = CELL + GAP;   // 13
+
+  // character geometry — slightly larger than one grid cell for that arcade feel
+  const PAC_R    = 8.5;
+  const GHOST_SZ = 15;
+  const DOT_R    = 2.0;          // contribution pellet circle radius
+  const DIM_R    = 1.2;          // zero-day dim dot
+  const POWER_R  = 4.5;          // power pellet
+  const BLINK    = 6;            // frames between power pellet blink states
+  const HDR      = 20;           // month label area height
 
   const bg      = dark ? '#0d1117' : '#ffffff';
-  const cellBg  = dark ? '#161b22' : '#ebedf0';
+  const gameBg  = '#0a0a12';    // arcade board is always dark
   const textCol = dark ? '#8b949e' : '#57606a';
+  const dimDot  = 'rgba(255,255,255,0.09)';
 
   const grid  = weeks.map(w => w.contributionDays.map(d => d.contributionCount));
   const path  = buildPath(weeks);
   const COLS  = grid.length;
   const W     = COLS * STEP;
-  const H     = HDR + 7 * STEP;
+  const H     = HDR + 7 * STEP + 4;
   const TOTAL = path.length;
   const DUR   = `${(TOTAL * 0.085).toFixed(1)}s`;
 
-  const eatAt = new Map(path.map(([c, r], i) => [`${c},${r}`, i]));
+  const eatAt      = new Map(path.map(([c, r], i) => [`${c},${r}`, i]));
+  const powerCells = new Set([[1,0],[1,6],[COLS-2,0],[COLS-2,6]].map(([c,r]) => `${c},${r}`));
 
   // ── defs ─────────────────────────────────────────────────────────────────
   const defs = `<defs>
@@ -266,8 +272,16 @@ function generateSVG(weeks, dark = true) {
     <stop offset="0%" stop-color="#3399ff"/>
     <stop offset="100%" stop-color="#003399"/>
   </radialGradient>
-  <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-    <feGaussianBlur stdDeviation="1.5" result="blur"/>
+  <radialGradient id="pacGrad" cx="40%" cy="35%" r="65%">
+    <stop offset="0%" stop-color="#ffe566"/>
+    <stop offset="100%" stop-color="#e6a000"/>
+  </radialGradient>
+  <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+    <feGaussianBlur stdDeviation="2.5" result="blur"/>
+    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="softglow" x="-30%" y="-30%" width="160%" height="160%">
+    <feGaussianBlur stdDeviation="1.2" result="blur"/>
     <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>
 </defs>`;
@@ -275,80 +289,94 @@ function generateSVG(weeks, dark = true) {
   // ── month labels ─────────────────────────────────────────────────────────
   const monthLabels = getMonthLabels(weeks)
     .map(({ col, name }) =>
-      `<text x="${col * STEP + 1}" y="${HDR - 3}" fill="${textCol}" font-family="sans-serif" font-size="9">${name}</text>`
+      `<text x="${col * STEP + 1}" y="${HDR - 5}" fill="${textCol}" font-family="monospace,sans-serif" font-size="9">${name}</text>`
     ).join('');
 
-  // ── background ───────────────────────────────────────────────────────────
-  let out = `<rect width="${W}" height="${H}" fill="${bg}"/>`;
+  let out = '';
 
-  // ── cell tiles (dark base) ────────────────────────────────────────────────
+  // ── backgrounds ──────────────────────────────────────────────────────────
+  out += `<rect width="${W}" height="${H}" fill="${bg}"/>`;
+  out += `<rect x="0" y="${HDR}" width="${W}" height="${7 * STEP + 4}" fill="${gameBg}"/>`;
+
+  // ── zero-day dim dots (skip power pellet positions) ───────────────────────
   for (let col = 0; col < COLS; col++) {
     for (let row = 0; row < (grid[col]?.length ?? 0); row++) {
-      out += `<rect x="${col * STEP}" y="${HDR + row * STEP}" width="${CELL}" height="${CELL}" rx="2" fill="${cellBg}"/>`;
+      if (grid[col][row] === 0 && !powerCells.has(`${col},${row}`)) {
+        const cx = (col * STEP + STEP / 2).toFixed(1);
+        const cy = (HDR + row * STEP + STEP / 2).toFixed(1);
+        out += `<circle cx="${cx}" cy="${cy}" r="${DIM_R}" fill="${dimDot}"/>`;
+      }
     }
   }
 
-  // ── green squares — disappear when pac-man eats them ─────────────────────
+  // ── contribution pellets (circles, disappear when eaten) ─────────────────
   for (let col = 0; col < COLS; col++) {
     for (let row = 0; row < (grid[col]?.length ?? 0); row++) {
+      if (powerCells.has(`${col},${row}`)) continue;
       const color = countToColor(grid[col][row]);
       if (!color) continue;
-
       const frame = eatAt.get(`${col},${row}`);
       if (frame === undefined) continue;
-
+      const cx  = (col * STEP + STEP / 2).toFixed(1);
+      const cy  = (HDR + row * STEP + STEP / 2).toFixed(1);
       const ops = Array.from({ length: TOTAL }, (_, f) => (f < frame ? 1 : 0)).join(';');
-      out += `<rect x="${col * STEP}" y="${HDR + row * STEP}" width="${CELL}" height="${CELL}" rx="2" fill="${color}">
+      out += `<circle cx="${cx}" cy="${cy}" r="${DOT_R}" fill="${color}" filter="url(#softglow)">
   <animate attributeName="opacity" values="${ops}" dur="${DUR}" repeatCount="indefinite" calcMode="discrete"/>
-</rect>`;
+</circle>`;
     }
   }
 
-  // ── maze walls (drawn over cells, under characters) ───────────────────────
-  out += mazeWalls(W, HDR, STEP, CELL, COLS);
+  // ── maze walls (over cells, under characters) ─────────────────────────────
+  out += mazeWalls(W, HDR, STEP, COLS);
 
-  // ── power pellets — blinking white dots at the 4 corners ─────────────────
+  // ── power pellets — blink then disappear when eaten ───────────────────────
   for (const [c, r] of [[1,0],[1,6],[COLS-2,0],[COLS-2,6]]) {
-    const cx = c * STEP + R;
-    const cy = HDR + r * STEP + R;
-    out += `<circle cx="${cx}" cy="${cy}" r="3.5" fill="#fff" filter="url(#glow)">
-  <animate attributeName="opacity" values="1;0.15;1" dur="0.6s" repeatCount="indefinite"/>
+    const cx    = (c * STEP + STEP / 2).toFixed(1);
+    const cy    = (HDR + r * STEP + STEP / 2).toFixed(1);
+    const frame = eatAt.get(`${c},${r}`) ?? TOTAL;
+    const ops   = Array.from({ length: TOTAL }, (_, f) => {
+      if (f >= frame) return 0;
+      return Math.floor(f / BLINK) % 2 === 0 ? 1 : 0.18;
+    }).join(';');
+    out += `<circle cx="${cx}" cy="${cy}" r="${POWER_R}" fill="#ffffff" filter="url(#glow)">
+  <animate attributeName="opacity" values="${ops}" dur="${DUR}" repeatCount="indefinite" calcMode="discrete"/>
 </circle>`;
   }
 
   // ── ghosts with AI ────────────────────────────────────────────────────────
   const ghosts = [
-    { mode: 'blinky', fill: '#e84040' },  // Blinky — red,    direct chaser
-    { mode: 'pinky',  fill: '#ff9ecf' },  // Pinky  — pink,   ambusher
-    { mode: 'inky',   fill: '#00e5cc' },  // Inky   — cyan,   flanker
-    { mode: 'clyde',  fill: '#ffb852' },  // Clyde  — orange, patrol/scatter
+    { mode: 'blinky', fill: '#e84040' },
+    { mode: 'pinky',  fill: '#ff9ecf' },
+    { mode: 'inky',   fill: '#00e5cc' },
+    { mode: 'clyde',  fill: '#ffb852' },
   ];
-
   for (const { mode, fill } of ghosts) {
     const positions = ghostPositions(path, mode, COLS);
-    out += ghostSVG(positions, fill, DUR, STEP, HDR, CELL);
+    out += ghostSVG(positions, fill, DUR, STEP, HDR, GHOST_SZ);
   }
 
-  // ── pac-man body (discrete d animation = position + mouth) ───────────────
+  // ── pac-man body ──────────────────────────────────────────────────────────
   const dVals = path.map(([col, row], i) => {
-    const cx  = col * STEP + R;
-    const cy  = HDR + row * STEP + R;
+    const cx  = col * STEP + STEP / 2;
+    const cy  = HDR + row * STEP + STEP / 2;
     const dir = row % 2 === 0 ? 0 : 180;
-    return pacmanD(cx, cy, R, dir, i % 2 === 0);
+    return pacmanD(cx, cy, PAC_R, dir, i % 2 === 0);
   }).join(';');
 
-  out += `<path fill="#f1c40f" filter="url(#glow)">
+  out += `<path fill="url(#pacGrad)" filter="url(#glow)">
   <animate attributeName="d" values="${dVals}" dur="${DUR}" repeatCount="indefinite" calcMode="discrete"/>
 </path>`;
 
   // ── pac-man eye ───────────────────────────────────────────────────────────
   const eyeCx = path.map(([col, row]) => {
-    const base = col * STEP + R;
-    return (row % 2 === 0 ? base + 1.8 : base - 1.8).toFixed(1);
+    const base = col * STEP + STEP / 2;
+    return (row % 2 === 0 ? base + 2.8 : base - 2.8).toFixed(1);
   }).join(';');
-  const eyeCy = path.map(([, row]) => (HDR + row * STEP + R - 2.5).toFixed(1)).join(';');
+  const eyeCy = path.map(([, row]) =>
+    (HDR + row * STEP + STEP / 2 - 4).toFixed(1)
+  ).join(';');
 
-  out += `<circle r="1.3" fill="#333">
+  out += `<circle r="1.5" fill="#1a1200">
   <animate attributeName="cx" values="${eyeCx}" dur="${DUR}" repeatCount="indefinite" calcMode="discrete"/>
   <animate attributeName="cy" values="${eyeCy}" dur="${DUR}" repeatCount="indefinite" calcMode="discrete"/>
 </circle>`;
