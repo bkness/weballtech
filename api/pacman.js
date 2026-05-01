@@ -186,7 +186,7 @@ function ghostSVG(positions, fill, DUR, STEP, HDR, SZ) {
 // Outer border, ghost house with pink door, vertical pillars, and T-wall stubs
 // that evoke the classic Pac-Man maze without disrupting the grid layout.
 
-function mazeWalls(W, HDR, STEP, COLS) {
+function mazeWalls(W, HDR, STEP, COLS, BOARD_Y) {
   const C  = '#1a6fd4';
   const sw = 2.5;
   const lc = 'round';
@@ -200,8 +200,8 @@ function mazeWalls(W, HDR, STEP, COLS) {
   const gapX  = ghX + (ghW - gapW) / 2;
 
   const lines = [
-    // outer border
-    `<rect x="1.5" y="${(HDR + 1.5).toFixed(1)}" width="${W - 3}" height="${(7 * STEP - 1).toFixed(1)}" fill="none" stroke="${C}" stroke-width="3" rx="6"/>`,
+    // outer border — starts at BOARD_Y to encompass the extra top tile row
+    `<rect x="1.5" y="${(BOARD_Y + 1.5).toFixed(1)}" width="${W - 3}" height="${(8 * STEP - 1).toFixed(1)}" fill="none" stroke="${C}" stroke-width="3" rx="6"/>`,
 
     // ghost house — U-shape (sides + bottom)
     `<path d="M${ghX},${ghY} L${ghX},${ghY + ghH} L${ghX + ghW},${ghY + ghH} L${ghX + ghW},${ghY}" fill="none" stroke="${C}" stroke-width="${sw}" stroke-linecap="${lc}" stroke-linejoin="round"/>`,
@@ -248,7 +248,8 @@ function generateSVG(weeks, dark = true) {
   const DIM_R    = 1.2;          // zero-day dim dot
   const POWER_R  = 4.5;          // power pellet
   const BLINK    = 6;            // frames between power pellet blink states
-  const HDR      = 20;           // month label area height
+  const HDR      = 20 + STEP;   // month label area — extra STEP leaves room for top tile row
+  const BOARD_Y  = HDR - STEP;  // game background starts one row above the data grid
 
   const bg      = dark ? '#0d1117' : '#ffffff';
   const gameBg  = '#0a0a12';    // arcade board is always dark
@@ -286,17 +287,25 @@ function generateSVG(weeks, dark = true) {
   </filter>
 </defs>`;
 
-  // ── month labels ─────────────────────────────────────────────────────────
+  // ── month labels — pinned above the game board ───────────────────────────
   const monthLabels = getMonthLabels(weeks)
     .map(({ col, name }) =>
-      `<text x="${col * STEP + 1}" y="${HDR - 5}" fill="${textCol}" font-family="monospace,sans-serif" font-size="9">${name}</text>`
+      `<text x="${col * STEP + 1}" y="${BOARD_Y - 3}" fill="${textCol}" font-family="monospace,sans-serif" font-size="9">${name}</text>`
     ).join('');
 
   let out = '';
 
   // ── backgrounds ──────────────────────────────────────────────────────────
   out += `<rect width="${W}" height="${H}" fill="${bg}"/>`;
-  out += `<rect x="0" y="${HDR}" width="${W}" height="${7 * STEP + 4}" fill="${gameBg}"/>`;
+  // game board extends one row above the data grid
+  out += `<rect x="0" y="${BOARD_Y}" width="${W}" height="${8 * STEP + 4}" fill="${gameBg}"/>`;
+
+  // ── extra top-row dim dots (decorative ceiling inside the border) ─────────
+  for (let col = 0; col < COLS; col++) {
+    const cx = (col * STEP + STEP / 2).toFixed(1);
+    const cy = (BOARD_Y + STEP / 2).toFixed(1);
+    out += `<circle cx="${cx}" cy="${cy}" r="${DIM_R}" fill="${dimDot}"/>`;
+  }
 
   // ── zero-day dim dots (skip power pellet positions) ───────────────────────
   for (let col = 0; col < COLS; col++) {
@@ -327,7 +336,7 @@ function generateSVG(weeks, dark = true) {
   }
 
   // ── maze walls (over cells, under characters) ─────────────────────────────
-  out += mazeWalls(W, HDR, STEP, COLS);
+  out += mazeWalls(W, HDR, STEP, COLS, BOARD_Y);
 
   // ── power pellets — blink then disappear when eaten ───────────────────────
   for (const [c, r] of [[1,0],[1,6],[COLS-2,0],[COLS-2,6]]) {
