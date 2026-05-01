@@ -269,6 +269,7 @@ async function commitFile(filename, content, sha) {
 // ── handler ──────────────────────────────────────────────────────────────────
 
 module.exports = async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
   try {
     const weeks   = await fetchContributions();
     const darkSVG = generateSVG(weeks, true);
