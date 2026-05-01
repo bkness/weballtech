@@ -2,6 +2,16 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const USERNAME     = 'bkness';
 const TARGET_REPO  = 'bkness';
 
+
+const defs = `
+<defs>
+  <linearGradient id="ghostRed" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#ff5c5c"/>
+    <stop offset="100%" stop-color="#b30000"/>
+  </linearGradient>
+</defs>
+`;
+
 // ── contribution data ────────────────────────────────────────────────────────
 
 async function fetchContributions() {
@@ -76,19 +86,59 @@ function countToColor(count) {
 
 // ── pacman path string ───────────────────────────────────────────────────────
 
-function pacmanD(cx, cy, R, dirDeg, open) {
-  const f = v => v.toFixed(2);
-  if (!open) {
-    // Closed: two semicircular arcs forming a full circle
-    return `M${f(cx - R)},${f(cy)} A${R},${R} 0 1,1 ${f(cx + R)},${f(cy)} A${R},${R} 0 1,1 ${f(cx - R)},${f(cy)} Z`;
-  }
-  const half = 30 * (Math.PI / 180);
-  const dir  = dirDeg * (Math.PI / 180);
-  const l1x  = cx + R * Math.cos(dir - half);
-  const l1y  = cy + R * Math.sin(dir - half);
-  const l2x  = cx + R * Math.cos(dir + half);
-  const l2y  = cy + R * Math.sin(dir + half);
-  return `M${f(cx)},${f(cy)} L${f(l1x)},${f(l1y)} A${R},${R} 0 1,1 ${f(l2x)},${f(l2y)} Z`;
+function pacmanSVG(path, STEP, HDR, R, DUR) {
+  const total = path.length;
+
+  const frames = path.map(([col, row], i) => {
+    const cx = col * STEP + R;
+    const cy = HDR + row * STEP + R;
+    const angle = row % 2 === 0 ? 0 : 180;
+
+    return `
+      <g transform="translate(${cx},${cy}) rotate(${angle})">
+        <!-- body -->
+        <circle r="${R}" fill="#f1c40f"/>
+
+        <!-- mouth (animated wedge cutout) -->
+        <path fill="#0d1117">
+          <animateTransform
+            attributeName="transform"
+            type="rotate"
+            values="0; 18; 0"
+            dur="0.25s"
+            repeatCount="indefinite"
+          />
+          <path d="
+            M 0 0
+            L ${R} ${-R/2}
+            A ${R} ${R} 0 1 1 ${R} ${R/2}
+            Z
+          "/>
+        </path>
+
+        <!-- eye -->
+        <circle cx="${R * 0.25}" cy="${-R * 0.25}" r="1.2" fill="#222"/>
+      </g>
+    `;
+  });
+
+  const txVals = path
+    .map(([c, r]) => `${c * STEP},${HDR + r * STEP}`)
+    .join(';');
+
+  return `
+    <g>
+      <animateTransform
+        attributeName="transform"
+        type="translate"
+        values="${txVals}"
+        dur="${DUR}"
+        repeatCount="indefinite"
+        calcMode="discrete"
+      />
+      ${frames[0]}
+    </g>
+  `;
 }
 
 // ── ghost shape (local coords 0,0 → CELL,CELL) ──────────────────────────────
@@ -124,12 +174,12 @@ function ghostSVG(path, delay, fill, STEP, HDR, DUR, CELL) {
   const pr   = (R * 0.22).toFixed(1);
 
   return `<g>
-    <animateTransform attributeName="transform" type="translate" values="${txVals}" dur="${DUR}" repeatCount="indefinite" calcMode="discrete"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0; 0 -1.2; 0 0" dur="1.2s" repeatCount="indefinite" calcMode="discrete"/>
     <path d="${body}" fill="${fill}"/>
     <circle cx="${ex1}" cy="${ey}" r="${er}" fill="white"/>
     <circle cx="${ex2}" cy="${ey}" r="${er}" fill="white"/>
-    <circle cx="${ex1}" cy="${ey}" r="${pr}" fill="#222f8c"/>
-    <circle cx="${ex2}" cy="${ey}" r="${pr}" fill="#222f8c"/>
+    <circle cx="${ex1}" cy="${ey}" r="${pr}" fill="url(#ghostRed)"/>
+    <circle cx="${ex2}" cy="${ey}" r="${pr}" fill="url(#ghostRed)"/>
   </g>`;
 }
 
@@ -172,7 +222,7 @@ function generateSVG(weeks, dark = true) {
     for (let row = 0; row < (grid[col]?.length ?? 0); row++) {
       const x = col * STEP;
       const y = HDR + row * STEP;
-      out += `<rect x="${x}" y="${y}" width="${CELL}" height="${CELL}" rx="1.5" fill="${cellBg}" stroke="${gridLine}" stroke-width="0.4"/>`;
+     out += pacmanSVG(path, STEP, HDR, R, DUR);
     }
   }
 
@@ -193,9 +243,15 @@ function generateSVG(weeks, dark = true) {
       }
 
       const ops = Array.from({ length: TOTAL }, (_, f) => (f < frame ? 1 : 0)).join(';');
-      out += `<circle cx="${cx}" cy="${cy}" r="2.2" fill="${color}">` +
-        `<animate attributeName="opacity" values="${ops}" dur="${DUR}" repeatCount="indefinite" calcMode="discrete"/>` +
-        `</circle>`;
+      out += `
+        <circle cx="${cx}" cy="${cy}" r="2.2" fill="${color}">
+          <animate attributeName="r"
+            values="2.2;2.5;2.2"
+            dur="1.5s"
+            repeatCount="indefinite"
+          />
+        </circle>
+        `;
     }
   }
 
