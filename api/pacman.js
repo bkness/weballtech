@@ -2,16 +2,6 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const USERNAME     = 'bkness';
 const TARGET_REPO  = 'bkness';
 
-
-const defs = `
-<defs>
-  <linearGradient id="ghostRed" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="#ff5c5c"/>
-    <stop offset="100%" stop-color="#b30000"/>
-  </linearGradient>
-</defs>
-`;
-
 // ── contribution data ────────────────────────────────────────────────────────
 
 async function fetchContributions() {
@@ -51,7 +41,7 @@ function buildPath(weeks) {
     for (let col = 0; col < weeks.length; col++) {
       if (row < weeks[col].contributionDays.length) cols.push(col);
     }
-    if (row % 2 !== 0) cols.reverse(); // alternate direction each row
+    if (row % 2 !== 0) cols.reverse();
     for (const col of cols) path.push([col, row]);
   }
   return path;
@@ -78,76 +68,35 @@ function getMonthLabels(weeks) {
 // ── color ────────────────────────────────────────────────────────────────────
 
 function countToColor(count) {
-  if (count < 3)  return '#0e4429';
-  if (count < 6)  return '#006d32';
-  if (count < 9)  return '#26a641';
-  return                 '#39d353';
+  if (count === 0) return null;
+  if (count < 3)   return '#0e4429';
+  if (count < 6)   return '#006d32';
+  if (count < 9)   return '#26a641';
+  return                  '#39d353';
 }
 
-// ── pacman path string ───────────────────────────────────────────────────────
+// ── pac-man path shape ───────────────────────────────────────────────────────
 
-function pacmanD(path, STEP, HDR, R, DUR) {
-  const total = path.length;
-
-  const frames = path.map(([col, row], i) => {
-    const cx = col * STEP + R;
-    const cy = HDR + row * STEP + R;
-    const angle = row % 2 === 0 ? 0 : 180;
-
-    return `
-      <g transform="translate(${cx},${cy}) rotate(${angle})">
-        <!-- body -->
-        <circle r="${R}" fill="#f1c40f"/>
-
-        <!-- mouth (animated wedge cutout) -->
-        <path fill="#0d1117">
-          <animateTransform
-            attributeName="transform"
-            type="rotate"
-            values="0; 18; 0"
-            dur="0.25s"
-            repeatCount="indefinite"
-          />
-          <path d="
-            M 0 0
-            L ${R} ${-R/2}
-            A ${R} ${R} 0 1 1 ${R} ${R/2}
-            Z
-          "/>
-        </path>
-
-        <!-- eye -->
-        <circle cx="${R * 0.25}" cy="${-R * 0.25}" r="1.2" fill="#222"/>
-      </g>
-    `;
-  });
-
-  const txVals = path
-    .map(([c, r]) => `${c * STEP},${HDR + r * STEP}`)
-    .join(';');
-
-  return `
-    <g>
-      <animateTransform
-        attributeName="transform"
-        type="translate"
-        values="${txVals}"
-        dur="${DUR}"
-        repeatCount="indefinite"
-        calcMode="discrete"
-      />
-      ${frames[0]}
-    </g>
-  `;
+function pacmanD(cx, cy, R, dir, open) {
+  const angle = open ? Math.PI / 7 : 0.01;
+  const cos   = Math.cos(angle);
+  const sin   = Math.sin(angle);
+  const sign  = dir === 0 ? 1 : -1;
+  const x1    = (cx + sign * R * cos).toFixed(2);
+  const y1    = (cy - R * sin).toFixed(2);
+  const x2    = (cx + sign * R * cos).toFixed(2);
+  const y2    = (cy + R * sin).toFixed(2);
+  const sweep = dir === 0 ? 0 : 1;
+  return `M${cx},${cy} L${x1},${y1} A${R},${R} 0 1,${sweep} ${x2},${y2} Z`;
 }
 
-// ── ghost shape (local coords 0,0 → CELL,CELL) ──────────────────────────────
+// ── ghost shape ──────────────────────────────────────────────────────────────
 
 function ghostBodyD(CELL) {
   const R  = CELL / 2;
-  const s1 = CELL / 3;          // 1/3 mark
-  const s2 = CELL * 2 / 3;      // 2/3 mark
-  const pk = CELL * 0.72;       // scallop peak y (from top)
+  const s1 = CELL / 3;
+  const s2 = (CELL * 2) / 3;
+  const pk = CELL * 0.72;
   return [
     `M0,${CELL}`,
     `L0,${R}`,
@@ -164,7 +113,7 @@ function ghostSVG(path, delay, fill, STEP, HDR, DUR, CELL) {
   const TOTAL   = path.length;
   const R       = CELL / 2;
   const shifted = path.map((_, i) => path[(i + TOTAL - delay) % TOTAL]);
-  const txVals  = shifted.map(([c, r]) => `${c * STEP},${HDR + r * STEP}`).join(';');
+  const txVals  = shifted.map(([c, r]) => `${c * STEP} ${HDR + r * STEP}`).join(';');
 
   const body = ghostBodyD(CELL);
   const ex1  = (R * 0.58).toFixed(1);
@@ -174,13 +123,14 @@ function ghostSVG(path, delay, fill, STEP, HDR, DUR, CELL) {
   const pr   = (R * 0.22).toFixed(1);
 
   return `<g>
-    <animateTransform attributeName="transform" type="translate" values="0 0; 0 -1.2; 0 0" dur="1.2s" repeatCount="indefinite" calcMode="discrete"/>
-    <path d="${body}" fill="${fill}"/>
-    <circle cx="${ex1}" cy="${ey}" r="${er}" fill="white"/>
-    <circle cx="${ex2}" cy="${ey}" r="${er}" fill="white"/>
-    <circle cx="${ex1}" cy="${ey}" r="${pr}" fill="url(#ghostRed)"/>
-    <circle cx="${ex2}" cy="${ey}" r="${pr}" fill="url(#ghostRed)"/>
-  </g>`;
+  <animateTransform attributeName="transform" type="translate"
+    values="${txVals}" dur="${DUR}" repeatCount="indefinite" calcMode="discrete"/>
+  <path d="${body}" fill="${fill}"/>
+  <circle cx="${ex1}" cy="${ey}" r="${er}" fill="white"/>
+  <circle cx="${ex2}" cy="${ey}" r="${er}" fill="white"/>
+  <circle cx="${ex1}" cy="${ey}" r="${pr}" fill="url(#ghostPupil)"/>
+  <circle cx="${ex2}" cy="${ey}" r="${pr}" fill="url(#ghostPupil)"/>
+</g>`;
 }
 
 // ── svg generation ───────────────────────────────────────────────────────────
@@ -190,12 +140,11 @@ function generateSVG(weeks, dark = true) {
   const GAP   = 2;
   const STEP  = CELL + GAP;
   const R     = CELL / 2;
-  const HDR   = 15;   // month-label header height
+  const HDR   = 15;
 
-  const bg       = dark ? '#0d1117' : '#ffffff';
-  const cellBg   = dark ? '#161b22' : '#ebedf0';
-  const gridLine = dark ? '#21262d' : '#d0d7de';
-  const textCol  = dark ? '#8b949e' : '#57606a';
+  const bg      = dark ? '#0d1117' : '#ffffff';
+  const cellBg  = dark ? '#161b22' : '#ebedf0';
+  const textCol = dark ? '#8b949e' : '#57606a';
 
   const grid  = weeks.map(w => w.contributionDays.map(d => d.contributionCount));
   const path  = buildPath(weeks);
@@ -205,34 +154,36 @@ function generateSVG(weeks, dark = true) {
   const TOTAL = path.length;
   const DUR   = `${(TOTAL * 0.085).toFixed(1)}s`;
 
-  // Index each cell to the frame Pac-Man eats it
   const eatAt = new Map(path.map(([c, r], i) => [`${c},${r}`, i]));
 
-  // ── month labels ─────────────────────────────────────────────────────────
+  const defs = `<defs>
+  <radialGradient id="ghostPupil" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#3399ff"/>
+    <stop offset="100%" stop-color="#003399"/>
+  </radialGradient>
+</defs>`;
+
   const monthLabels = getMonthLabels(weeks)
     .map(({ col, name }) =>
       `<text x="${col * STEP + 1}" y="${HDR - 3}" fill="${textCol}" font-family="sans-serif" font-size="9">${name}</text>`
     ).join('');
 
-  // ── background ───────────────────────────────────────────────────────────
   let out = `<rect width="${W}" height="${H}" fill="${bg}"/>`;
 
-  // ── cell tiles (static dark squares forming the maze) ───────────────────
+  // cell tiles
   for (let col = 0; col < COLS; col++) {
     for (let row = 0; row < (grid[col]?.length ?? 0); row++) {
-      const x = col * STEP;
-      const y = HDR + row * STEP;
-     out += pacmanD(path, STEP, HDR, R, DUR);
+      out += `<rect x="${col * STEP}" y="${HDR + row * STEP}" width="${CELL}" height="${CELL}" rx="2" fill="${cellBg}"/>`;
     }
   }
 
-  // ── pellets (contribution dots that get eaten) ────────────────────────────
+  // pellets — disappear when eaten
   for (let col = 0; col < COLS; col++) {
     for (let row = 0; row < (grid[col]?.length ?? 0); row++) {
       const count = grid[col][row];
-      if (count === 0) continue;
-
       const color = countToColor(count);
+      if (!color) continue;
+
       const cx    = col * STEP + R;
       const cy    = HDR + row * STEP + R;
       const frame = eatAt.get(`${col},${row}`);
@@ -243,48 +194,42 @@ function generateSVG(weeks, dark = true) {
       }
 
       const ops = Array.from({ length: TOTAL }, (_, f) => (f < frame ? 1 : 0)).join(';');
-      out += `
-        <circle cx="${cx}" cy="${cy}" r="2.2" fill="${color}">
-          <animate attributeName="r"
-            values="2.2;2.5;2.2"
-            dur="1.5s"
-            repeatCount="indefinite"
-          />
-        </circle>
-        `;
+      out += `<circle cx="${cx}" cy="${cy}" r="2.2" fill="${color}">
+  <animate attributeName="opacity" values="${ops}" dur="${DUR}" repeatCount="indefinite" calcMode="discrete"/>
+</circle>`;
     }
   }
 
-  // ── ghosts ────────────────────────────────────────────────────────────────
-  // Blinky (red) 7 steps behind, Pinky (pink) 14 steps behind
+  // ghosts: Blinky (red) 7 steps behind, Pinky (pink) 14 steps behind
   out += ghostSVG(path,  7, '#e84040', STEP, HDR, DUR, CELL);
   out += ghostSVG(path, 14, '#ff9ecf', STEP, HDR, DUR, CELL);
 
-  // ── pac-man ───────────────────────────────────────────────────────────────
-  // Even rows move right (0°), odd rows move left (180°)
+  // pac-man body
   const dVals = path.map(([col, row], i) => {
-    const cx   = col * STEP + R;
-    const cy   = HDR + row * STEP + R;
-    const dir  = row % 2 === 0 ? 0 : 180;
-    const open = i % 2 === 0;
-    return pacmanD(cx, cy, R, dir, open);
+    const cx  = col * STEP + R;
+    const cy  = HDR + row * STEP + R;
+    const dir = row % 2 === 0 ? 0 : 180;
+    return pacmanD(cx, cy, R, dir, i % 2 === 0);
   }).join(';');
 
-  out += `<path fill="#f1c40f"><animate attributeName="d" values="${dVals}" dur="${DUR}" repeatCount="indefinite" calcMode="discrete"/></path>`;
+  out += `<path fill="#f1c40f">
+  <animate attributeName="d" values="${dVals}" dur="${DUR}" repeatCount="indefinite" calcMode="discrete"/>
+</path>`;
 
-  // ── eye (follows pac-man) ─────────────────────────────────────────────────
+  // pac-man eye
   const eyeCx = path.map(([col, row]) => {
     const base = col * STEP + R;
     return (row % 2 === 0 ? base + 1.8 : base - 1.8).toFixed(1);
   }).join(';');
-  const eyeCy = path.map(([, row]) => (HDR + row * STEP + R - 2.2).toFixed(1)).join(';');
+  const eyeCy = path.map(([, row]) => (HDR + row * STEP + R - 2.5).toFixed(1)).join(';');
 
-  out += `<circle r="1.3" fill="#333">` +
-    `<animate attributeName="cx" values="${eyeCx}" dur="${DUR}" repeatCount="indefinite" calcMode="discrete"/>` +
-    `<animate attributeName="cy" values="${eyeCy}" dur="${DUR}" repeatCount="indefinite" calcMode="discrete"/>` +
-    `</circle>`;
+  out += `<circle r="1.3" fill="#333">
+  <animate attributeName="cx" values="${eyeCx}" dur="${DUR}" repeatCount="indefinite" calcMode="discrete"/>
+  <animate attributeName="cy" values="${eyeCy}" dur="${DUR}" repeatCount="indefinite" calcMode="discrete"/>
+</circle>`;
 
   return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+  ${defs}
   ${monthLabels}
   ${out}
 </svg>`;
@@ -327,8 +272,8 @@ async function commitFile(filename, content, sha) {
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   try {
-    const weeks   = await fetchContributions();
-    const darkSVG = generateSVG(weeks, true);
+    const weeks    = await fetchContributions();
+    const darkSVG  = generateSVG(weeks, true);
     const lightSVG = generateSVG(weeks, false);
 
     const [darkSHA, lightSHA] = await Promise.all([
