@@ -417,6 +417,10 @@ async function commitFile(filename, content, sha) {
       }),
     }
   );
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    console.error(`commitFile ${filename} failed: ${res.status} ${text}`);
+  }
   return res.ok;
 }
 
@@ -429,15 +433,12 @@ module.exports = async function handler(req, res) {
     const darkSVG  = generateSVG(weeks, true);
     const lightSVG = generateSVG(weeks, false);
 
-    const [darkSHA, lightSHA] = await Promise.all([
-      getFileSHA('github-pacman-dark.svg'),
-      getFileSHA('github-pacman.svg'),
-    ]);
+    // Sequential commits — parallel writes to the same repo can race
+    const darkSHA  = await getFileSHA('github-pacman-dark.svg');
+    const darkOk   = await commitFile('github-pacman-dark.svg', darkSVG,  darkSHA);
 
-    const [darkOk, lightOk] = await Promise.all([
-      commitFile('github-pacman-dark.svg', darkSVG,  darkSHA),
-      commitFile('github-pacman.svg',      lightSVG, lightSHA),
-    ]);
+    const lightSHA = await getFileSHA('github-pacman.svg');
+    const lightOk  = await commitFile('github-pacman.svg',      lightSVG, lightSHA);
 
     res.status(200).json({ ok: true, dark: darkOk, light: lightOk });
   } catch (err) {
