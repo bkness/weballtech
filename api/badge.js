@@ -35,10 +35,18 @@ function buildSVG({ online, last_seen }, forged) {
   const scanner = forged?.scanner;
   const shell   = forged?.shell;
 
-  const scanColor  = !online ? '#4a7a55' : !scanner ? '#4a7a55' : scanner.safe ? '#00ff41' : '#cc3333';
-  const scanText   = !scanner ? '— —' : scanner.safe
-    ? `SAFE &#183; ${scanner.packages} pkgs`
-    : `${scanner.flagged.length} FLAGGED &#183; ${scanner.packages} pkgs`;
+  // green = clean, amber = warnings only, red = errors (malware, tampering).
+  // Scans from forged-cli < 0.4.3 have no counts: fall back to safe/flagged.
+  const scanErrors   = scanner ? (scanner.errors ?? (scanner.safe ? 0 : scanner.flagged.length)) : 0;
+  const scanWarnings = scanner?.warnings ?? 0;
+  const scanColor  = !online || !scanner ? '#4a7a55'
+    : scanErrors   ? '#cc3333'
+    : scanWarnings ? '#ffb000'
+    : '#00ff41';
+  const scanText   = !scanner ? '— —'
+    : scanErrors   ? `${scanErrors} FLAGGED &#183; ${scanner.packages} pkgs`
+    : scanWarnings ? `SAFE &#183; ${scanWarnings} WARN &#183; ${scanner.packages} pkgs`
+    : `SAFE &#183; ${scanner.packages} pkgs`;
   const scanAge    = scanner ? timeAgo(scanner.checked_at) : null;
 
   const shellText  = shell ? `v${shell.version} &#183; ${shell.plugins} plugins &#183; ${shell.hooks} hooks` : '— —';
