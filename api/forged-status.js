@@ -43,9 +43,12 @@ module.exports = async function handler(req, res) {
     const { type, data } = req.body ?? {};
 
     if (type === 'scanner') {
-      // { safe, packages, flagged, checked_at }
+      // { safe, errors, warnings, packages, flagged, checked_at }
+      // errors/warnings come from forged-cli >= 0.4.3; older scanners omit them
       const payload = {
         safe:       data.safe ?? true,
+        errors:     Number.isInteger(data.errors) ? data.errors : null,
+        warnings:   Number.isInteger(data.warnings) ? data.warnings : null,
         packages:   data.packages ?? 0,
         flagged:    data.flagged ?? [],
         checked_at: data.checked_at ?? new Date().toISOString(),
