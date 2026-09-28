@@ -321,6 +321,13 @@ kbd {
   line-height: 1.6;
 }
 
+.tip a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+
 /* ─── FLOW DIAGRAM ─── */
 .flow {
   display: flex;
