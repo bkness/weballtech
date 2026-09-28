@@ -15,7 +15,7 @@
     <div class="header-eyebrow">// user guide &amp; command reference</div>
     <h1>⚒ devforge</h1>
     <div class="subtitle">YOUR DEVELOPER COCKPIT — MODULAR · FAST · EXPRESSIVE</div>
-    <div class="version-badge">v0.3.9 — now on npm</div>
+    <div class="version-badge">v0.6.0 — now on npm</div>
   </header>
 
   <!-- ═══ INSTALLATION ═══ -->
@@ -33,21 +33,96 @@
     </div>
     <div class="install-line">
       <span class="prompt">$</span>
-      <span>forged init</span>
-      <button class="copy-btn" onclick="copyCmd(this, 'forged init')">copy</button>
+      <span>forged scan</span>
+      <button class="copy-btn" onclick="copyCmd(this, 'forged scan')">copy</button>
     </div>
     <div class="install-line">
       <span class="prompt">#</span>
-      <span style="color:var(--muted)">then reload your shell — exec zsh</span>
+      <span style="color:var(--muted)">audit the project you're in — see 02 // security scanner</span>
     </div>
   </div>
 
   <div style="margin-top:16px">
-    <div class="tip">💡 devforge writes to ~/dev/dotfiles and adds a source hook to ~/.zshrc automatically. Your existing config is never overwritten.</div>
+    <div class="tip">💡 The npm package ships the scanner, <code>forged gen</code> and <code>forged readme</code> today. Sections 03–11 cover the shell environment, which runs from <a href="https://github.com/bkness/dotfiles" target="_blank">bkness/dotfiles</a> for now — <code>forged init</code> will install it with a guided, step-by-step setup.</div>
+  </div>
+
+  <!-- ═══ SECURITY SCANNER ═══ -->
+  <div class="section-header">02 // security scanner</div>
+
+  <div class="card accent-green">
+    <div class="card-header">
+      <div class="card-icon">🔍</div>
+      <div>
+        <div class="card-title">forged scan</div>
+        <div class="card-subtitle">AUDITS EVERY PACKAGE IN PACKAGE-LOCK.JSON</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="cmd-table">
+        <div class="cmd-row">
+          <span class="cmd">known malware</span>
+          <span class="cmd-desc">checked against OSV.dev — OpenSSF MAL- reports and GitHub malware advisories (CWE-506).</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">tarball integrity</span>
+          <span class="cmd-desc">lockfile hashes vs. the npm registry. a mismatch means the installed package isn't what was published.</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">publisher changes</span>
+          <span class="cmd-desc">flags a release by an account that never published the package before. auto-verified when the evidence holds up: signed provenance, prior maintainer, repo contributor, org email, trusted co-maintainer. security-critical packages (jsonwebtoken, bcrypt…) always get a human look.</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">fresh versions</span>
+          <span class="cmd-desc">releases under 72h old — the window when hijacked versions usually go unnoticed.</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">typosquats</span>
+          <span class="cmd-desc">names one or two characters away from popular packages.</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">install scripts</span>
+          <span class="cmd-desc">curl | sh, eval, base64 decoding and similar in package.json scripts.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card accent-green" style="margin-top:16px">
+    <div class="card-header">
+      <div class="card-icon">⚙️</div>
+      <div>
+        <div class="card-title">flags</div>
+        <div class="card-subtitle">EXITS 1 ON ERRORS — DROP IT INTO CI</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="cmd-table">
+        <div class="cmd-row">
+          <span class="cmd">-v, --verbose</span>
+          <span class="cmd-desc">show suppressed maintainer rotations and verified publishers, with reasons.</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">--report / --report-md</span>
+          <span class="cmd-desc">save findings to forged-report.json or forged-report.md.</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">--changed</span>
+          <span class="cmd-desc">skip if package.json + lockfile match a scan from the last 7 days (~50ms). rescans weekly anyway — new malware advisories land even when your lockfile doesn't change.</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">-q, --quiet</span>
+          <span class="cmd-desc">no output unless something is flagged, then one line. built for shell hooks.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:16px">
+    <div class="tip">💡 Scan on every cd: <code>forged scan --changed --quiet</code> in a zsh chpwd hook. The dotfiles run it in the background and print any alert at your next prompt.</div>
   </div>
 
   <!-- ═══ PROJECT WORKFLOW ═══ -->
-  <div class="section-header">02 // project workflow</div>
+  <div class="section-header">03 // project workflow</div>
 
   <div class="grid-3">
 
@@ -171,7 +246,7 @@
   </div><!-- /grid-3 -->
 
   <!-- ═══ GIT COMMANDS ═══ -->
-  <div class="section-header">03 // git shortcuts</div>
+  <div class="section-header">04 // git shortcuts</div>
 
   <div class="grid-2">
 
@@ -254,7 +329,7 @@
   </div>
 
   <!-- ═══ KEYBOARD SHORTCUTS ═══ -->
-  <div class="section-header">04 // keyboard shortcuts</div>
+  <div class="section-header">05 // keyboard shortcuts</div>
 
   <div class="card accent-green">
     <div class="card-header">
@@ -295,7 +370,7 @@
   </div>
 
   <!-- ═══ AUTO-DETECTION ═══ -->
-  <div class="section-header">05 // project auto-detection</div>
+  <div class="section-header">06 // project auto-detection</div>
 
   <div class="card accent-green" style="margin-bottom:16px">
     <div class="card-header">
@@ -410,7 +485,7 @@
   </div>
 
   <!-- ═══ GITHUB DASHBOARD ═══ -->
-  <div class="section-header">06 // github dashboard &amp; issue workflow</div>
+  <div class="section-header">07 // github dashboard &amp; issue workflow</div>
 
   <div class="card accent-green" style="margin-bottom:16px">
     <div class="card-header">
@@ -535,7 +610,7 @@
   </div>
 
   <!-- ═══ SHELL ALIASES ═══ -->
-  <div class="section-header">07 // shell aliases</div>
+  <div class="section-header">08 // shell aliases</div>
 
   <div class="card accent-green">
     <div class="card-header">
@@ -646,7 +721,7 @@
   </div>
 
   <!-- ═══ ARCHITECTURE ═══ -->
-  <div class="section-header">08 // architecture</div>
+  <div class="section-header">09 // architecture</div>
 
   <div class="grid-2">
 
@@ -709,7 +784,7 @@
   </div>
 
   <!-- ═══ WRITE A PLUGIN ═══ -->
-  <div class="section-header">09 // write a plugin</div>
+  <div class="section-header">10 // write a plugin</div>
 
   <div class="card accent-green">
     <div class="card-header">
@@ -738,7 +813,7 @@
   </div>
 
   <!-- ═══ CACHE ═══ -->
-  <div class="section-header">10 // cache + debug</div>
+  <div class="section-header">11 // cache + debug</div>
 
   <div class="grid-2">
 
